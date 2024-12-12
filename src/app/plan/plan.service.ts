@@ -45,10 +45,6 @@ export class PlanService {
     const existingActivePlan = await this.getActivePlanForOrganization(organizationId);
     if (existingActivePlan) {
       await this.cancelExistingPlanForUpgrade(existingActivePlan, planToActivate);
-      const message = `Can't activate plan ${planId}, plan ${existingActivePlan.id} is already active`;
-      this.logger.error(message);
-      this.alertService.sendAlert(message);
-      throw new InternalServerErrorException(message);
     }
 
     const paidUntil = new Date(Date.now() + Dates.days(31));
@@ -61,6 +57,7 @@ export class PlanService {
     if (existingActivePlan) {
       this.topUpAndDilute(organization, planToActivate);
     } else {
+      await this.usageMetricsService.resetForOrganization(organizationId);
       this.buyPostageBatch(organization, plan);
     }
   }

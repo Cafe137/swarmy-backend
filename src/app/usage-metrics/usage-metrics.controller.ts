@@ -7,7 +7,7 @@ import { UsageMetricsService } from './usage-metrics.service';
 export class UsageMetricsController {
   constructor(private readonly usageMetricsService: UsageMetricsService) {}
 
-  @Get('/')
+  @Get('/usage-metrics')
   getUsageMetricsForOrganization(@UserInContext() user: UsersRow) {
     return this.usageMetricsService.getAllForOrganization(user.organizationId);
   }

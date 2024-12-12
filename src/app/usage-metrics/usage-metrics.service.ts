@@ -30,10 +30,6 @@ export class UsageMetricsService {
     await updateUsageMetricsRow(metric.id, { used: metric.used + value });
   }
 
-  async getForOrganization(organizationId: OrganizationsRowId, type: UsageMetricType): Promise<UsageMetricsRow> {
-    return getOnlyUsageMetricsRowOrThrow({ organizationId, type });
-  }
-
   async getAllForOrganization(organizationId: OrganizationsRowId): Promise<UsageMetricsRow[]> {
     return getUsageMetricsRows({ organizationId });
   }
@@ -65,5 +61,12 @@ export class UsageMetricsService {
     for (const metric of metrics) {
       await updateUsageMetricsRow(metric.id, { used: 0, periodEndsAt: new Date(Date.now() + Dates.days(30)) });
     }
+  }
+
+  private async getForOrganization(
+    organizationId: OrganizationsRowId,
+    type: UsageMetricType,
+  ): Promise<UsageMetricsRow> {
+    return getOnlyUsageMetricsRowOrThrow({ organizationId, type });
   }
 }
