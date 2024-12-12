@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AlertModule } from '../alert/alert.module';
+import { BeeModule } from '../bee/bee.module';
+import { UsageMetricsModule } from '../usage-metrics/usage-metrics.module';
 import { PlanController } from './plan.controller';
 import { PlanService } from './plan.service';
 
@@ -7,6 +9,6 @@ import { PlanService } from './plan.service';
   controllers: [PlanController],
   providers: [PlanService],
   exports: [PlanService],
-  imports: [AlertModule],
+  imports: [AlertModule, UsageMetricsModule, BeeModule],
 })
 export class PlanModule {}

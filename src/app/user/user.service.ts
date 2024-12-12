@@ -13,6 +13,7 @@ import {
 } from 'src/DatabaseExtra';
 import { EmailService } from '../email/email.service';
 import { OrganizationService } from '../organization/organization.service';
+import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { RegisterUserDto } from './register-user.dto';
 
 @Injectable()
@@ -24,6 +25,7 @@ export class UserService {
     @InjectPinoLogger(UserService.name)
     private readonly logger: PinoLogger,
     private organizationService: OrganizationService,
+    private usageMetricsService: UsageMetricsService,
     private emailService: EmailService,
   ) {
     this.frontendUrl = Types.asString(configService.get<string>('FRONTEND_URL'), { name: 'FRONTEND_URL' });
@@ -32,6 +34,7 @@ export class UserService {
   async createUser(registerUserDto: RegisterUserDto) {
     await this.verifyUniqueEmail(registerUserDto.email);
     const organization = await this.organizationService.create(`${registerUserDto.email}'s organization`);
+    this.usageMetricsService.createInitialMetrics(organization.id);
 
     const emailVerificationCode = this.generateRandomTokenWithTimestamp();
 

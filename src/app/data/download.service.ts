@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { FileReferencesRow, OrganizationsRow } from 'src/DatabaseExtra';
+import { OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
+import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { DownloadResult } from './download-result';
 import { FileReferenceService } from './file.service';
-import { UsageMetricsService } from './usage-metrics.service';
 
 @Injectable()
 export class DownloadService {
@@ -25,10 +25,7 @@ export class DownloadService {
     if (!fileRef) {
       throw new NotFoundException();
     }
-    const metric = await this.validateDownloadLimit(organization, fileRef);
-    this.usageMetricsService.increment(metric, fileRef.size).catch((e) => {
-      console.error('Failed to handle download event', e);
-    });
+    await this.usageMetricsService.incrementOrFail(organization.id, 'down', fileRef.size);
     const result = await this.beeService.download(hash, path);
 
     this.logger.info('CONTENT TYPE:' + result.contentType);
@@ -58,14 +55,5 @@ export class DownloadService {
       this.logger.error(message);
       throw new BadRequestException();
     }
-  }
-
-  private async validateDownloadLimit(organization: OrganizationsRow, fileReference: FileReferencesRow) {
-    const metric = await this.usageMetricsService.getForOrganization(organization.id, 'DOWNLOADED_BYTES');
-    const remaining = metric.available - metric.used;
-    if (remaining < fileReference.size) {
-      throw new UnprocessableEntityException(`Download limit reached.`);
-    }
-    return metric;
   }
 }

@@ -100,10 +100,10 @@ export type UsageMetricsRowId = number & { __brand: 'UsageMetricsRowId' };
 export interface UsageMetricsRow {
   id: UsageMetricsRowId;
   organizationId: OrganizationsRowId;
-  period: string;
   type: 'UPLOADED_BYTES' | 'DOWNLOADED_BYTES';
   available: number;
   used: number;
+  periodEndsAt: Date;
 }
 
 export type UsersRowId = number & { __brand: 'UsersRowId' };
@@ -187,10 +187,10 @@ export interface NewStaticTextsRow {
 
 export interface NewUsageMetricsRow {
   organizationId: OrganizationsRowId;
-  period: string;
   type: 'UPLOADED_BYTES' | 'DOWNLOADED_BYTES';
   available: number;
   used?: number | null;
+  periodEndsAt: Date;
 }
 
 export interface NewUsersRow {

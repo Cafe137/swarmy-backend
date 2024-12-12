@@ -1,23 +1,17 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Dates, Strings } from 'cafe-utility';
+import { Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   getOnlyPlansRowOrThrow,
   insertPaymentsRow,
   insertPlansRow,
   OrganizationsRow,
-  OrganizationsRowId,
-  PlansRow,
-  PlansRowId,
-  updateOrganizationsRow,
   updatePaymentsRow,
-  updatePlansRow,
   UsersRow,
 } from 'src/DatabaseExtra';
 import Stripe from 'stripe';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
-import { UsageMetricsService } from '../data/usage-metrics.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PaymentService } from '../payment/payment.service';
 import { StripeService } from '../payment/stripe.service';
@@ -38,20 +32,14 @@ export class BillingService {
     private paymentService: PaymentService,
     private beeService: BeeService,
     private organizationService: OrganizationService,
-    private usageMetricsService: UsageMetricsService,
   ) {}
 
   async handleStripeNotification(rawRequestBody: Buffer, signature: string) {
-    // const merchantTransactionId = notification['merchantTransactionId'];
     const event = await this.stripeService.handleNotification(rawRequestBody, signature);
 
-    // const object = event.data.object as any;
-    // this.logger.debug(`Received stripe event ${event.type}`);
     switch (event.type) {
       // successful payment and start of a subscription
       case 'checkout.session.completed':
-        // console.log(event)
-        // console.debug(object);
         const object = event.data.object as any;
         const merchantTransactionId = object.client_reference_id;
         const stripeCustomerId = object.customer;
@@ -61,8 +49,6 @@ export class BillingService {
         await this.handleInvoicePaid(event.data.object as Stripe.Invoice);
         break;
     }
-
-    // const merchantTransactionId = 'x';
   }
 
   async initSubscriptionProcess(user: UsersRow, payload: StartSubscriptionDto) {
@@ -108,8 +94,6 @@ export class BillingService {
     this.logger.info(`Initializing payment. User: ${user.id} Amount: ${plan.amount} ${plan.currency}`);
     const result = this.stripeService.initPayment(user.organizationId, plan.id, user.email, totalCents, plan.currency);
 
-    //todo add scheduled that closes payments after x hours, cleans up unpaid plans
-
     return result;
   }
 
@@ -136,39 +120,9 @@ export class BillingService {
     await updatePaymentsRow(payment.id, { status: 'SUCCESS' });
 
     const organization = await this.organizationService.getOrganization(payment.organizationId);
-    const planIdToActivate = payment.planId;
+    const planToActivate = await this.planService.getPlanById(organization.id, payment.planId);
 
-    const planToActivate = await this.planService.getPlanById(organization.id, planIdToActivate);
-    if (planToActivate.status !== 'PENDING_PAYMENT') {
-      const message = `Plan ${planIdToActivate} to activate must be PENDING_PAYMENT, but it's ${planToActivate.status}`;
-      this.alertService.sendAlert(message);
-      this.logger.error(message);
-      return;
-    }
-    const activePlan = await this.planService.getActivePlanForOrganization(organization.id);
-    if (activePlan) {
-      await this.cancelExistingPlanForUpgrade(activePlan, planToActivate);
-      const newPlan = await this.activateNewPlan(organization.id, planIdToActivate);
-      this.topUpAndDilute(organization, newPlan);
-    } else {
-      const plan = await this.activateNewPlan(organization.id, planIdToActivate);
-      this.buyPostageBatch(organization, plan);
-    }
-  }
-
-  private async cancelExistingPlanForUpgrade(planToCancel: PlansRow, planToUpgradeTo: PlansRow) {
-    this.logger.info(`Cancelling plan ${planToCancel.id}, upgrading to ${planToUpgradeTo.id}`);
-    updatePlansRow(planToCancel.id, {
-      status: 'CANCELLED',
-      statusReason: `UPGRADED_TO: ${planToUpgradeTo.id}`,
-    });
-  }
-
-  private async activateNewPlan(organizationId: OrganizationsRowId, planId: PlansRowId) {
-    this.logger.info(`Activating plan: ${planId}`);
-    const plan = await this.planService.activatePlan(organizationId, planId);
-    await this.usageMetricsService.upgradeCurrentMetrics(organizationId, plan.uploadSizeLimit, plan.downloadSizeLimit);
-    return plan;
+    await this.planService.activatePlan(organization.id, planToActivate.id);
   }
 
   private async handleInvoicePaid(object: Stripe.Invoice) {
@@ -179,10 +133,8 @@ export class BillingService {
       this.alertService.sendAlert(message);
       throw new InternalServerErrorException(message);
     }
-    this.logger.info(`Processing invoicePaid for merchantTransactionId: ${merchantTransactionId}`);
 
-    // initial payment
-    // todo check if client ref id is passed for recurring transactions. If not, look up org by email or sub id?
+    this.logger.info(`Processing invoicePaid for merchantTransactionId: ${merchantTransactionId}`);
     const payment = await this.paymentService.getPaymentByMerchantTransactionId(merchantTransactionId);
 
     if (object.billing_reason === 'subscription_create') {
@@ -190,16 +142,6 @@ export class BillingService {
     } else {
       // recurring payment, there must be already a plan at this point
       this.logger.debug(`Creating successful payment for plan: ${payment.planId}`);
-
-      const plan = await this.planService.getPlanById(payment.organizationId, payment.planId);
-      const organization = await this.organizationService.getOrganization(payment.organizationId);
-      if (!plan.paidUntil) {
-        const message = `Plan ${plan.id} has no paidUntil date.`;
-        this.alertService.sendAlert(message);
-        throw new InternalServerErrorException(message);
-      }
-      const paidUntil = new Date(Date.now() + Dates.days(31));
-      await updatePlansRow(plan.id, { paidUntil });
       await insertPaymentsRow({
         amount: object.amount_paid,
         currency: object.currency,
@@ -208,7 +150,7 @@ export class BillingService {
         status: 'SUCCESS',
         merchantTransactionId,
       });
-      this.topUp(organization, plan);
+      await this.planService.applyRecurringPayment(payment.organizationId);
     }
   }
 
@@ -216,90 +158,5 @@ export class BillingService {
     this.logger.info(`Cancelling plan for organization ${organization.id}.`);
     await this.planService.scheduleActivePlanForCancellation(organization.id);
     // todo cancel stripe subscription
-  }
-
-  private async buyPostageBatch(organization: OrganizationsRow, plan: PlansRow) {
-    const organizationId = organization.id;
-    await updateOrganizationsRow(organizationId, { postageBatchStatus: 'CREATING' });
-    try {
-      const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
-      // top up for 35 days for tolerating late recurring payments
-      const days = DAYS_TO_PURCHASE_POSTAGE_BATCH;
-      const config = calculateDepthAndAmount(days, requestedGbs);
-      this.logger.info(
-        `Creating postage batch. Amount: ${config.amount}, depth: ${config.depth}, cost: BZZ ${config.bzzPrice}`,
-      );
-      const batchId = await this.beeService.createPostageBatch(config.amount.toFixed(0), config.depth);
-      this.logger.info(`Updating postback batch of organization ${organizationId} to ${batchId}`);
-      await updateOrganizationsRow(organizationId, { postageBatchId: batchId, postageBatchStatus: 'CREATED' });
-    } catch (e) {
-      const message = `Failed to buy postage batch for organization ${organizationId}`;
-      this.alertService.sendAlert(message);
-      this.logger.error(e, message);
-      await updateOrganizationsRow(organizationId, { postageBatchStatus: 'FAILED_TO_CREATE' });
-    }
-  }
-
-  private async topUp(organization: OrganizationsRow, plan: PlansRow) {
-    const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
-    const days = 31;
-    const config = calculateDepthAndAmount(days, requestedGbs);
-    const amount = config.amount.toFixed(0);
-    await this.tryTopUp(organization, amount, days);
-  }
-
-  private async tryTopUp(organization: OrganizationsRow, amount: string, days: number) {
-    if (!organization.postageBatchId) {
-      const message = `Organization ${organization.id} has no postage batch id. Failing top up.`;
-      this.alertService.sendAlert(message);
-      this.logger.error(message);
-      throw new InternalServerErrorException(message);
-    }
-    try {
-      this.logger.info(`Performing topUp on ${organization.postageBatchId} with amount: ${amount}. (days: ${days})`);
-      await this.beeService.topUp(organization.postageBatchId, amount);
-      this.logger.info(
-        `TopUp completed successfully on ${organization.postageBatchId} with amount: ${amount}. (days: ${days})`,
-      );
-      return true;
-    } catch (e) {
-      const message = `TopUp operation failed. Org: ${organization.id}`;
-      this.alertService.sendAlert(message, e);
-      this.logger.error(e, message);
-      await updateOrganizationsRow(organization.id, { postageBatchStatus: 'FAILED_TO_TOP_UP' });
-      return false;
-    }
-  }
-
-  private async topUpAndDilute(organization: OrganizationsRow, plan: PlansRow) {
-    if (!organization.postageBatchId) {
-      const message = `Organization ${organization.id} has no postage batch id. Failing top up and dilute.`;
-      this.alertService.sendAlert(message);
-      throw new InternalServerErrorException(message);
-    }
-    //todo calculate minimum required top up amount
-    //todo check if dilute is needed
-    //todo store amount and depth?
-
-    const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
-    const days = 31;
-    const config = calculateDepthAndAmount(days, requestedGbs);
-    const amount = config.amount.toFixed(0);
-    const success: boolean = await this.tryTopUp(organization, amount, days);
-    if (!success) {
-      const message = `TopUp operation failed. Skipping diluting. Org: ${organization.id}`;
-      this.alertService.sendAlert(message);
-      this.logger.error(message);
-      return;
-    }
-    try {
-      await this.beeService.dilute(organization.postageBatchId, config.depth);
-      this.logger.info(`Dilute successful dilute on ${organization.postageBatchId} with depth: ${config.depth}`);
-    } catch (e) {
-      const message = `Dilute operation failed. Org: ${organization.id}`;
-      this.alertService.sendAlert(message, e);
-      this.logger.error(e, message);
-      await updateOrganizationsRow(organization.id, { postageBatchStatus: 'FAILED_TO_DILUTE' });
-    }
   }
 }

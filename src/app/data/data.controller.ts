@@ -26,7 +26,6 @@ import { DownloadService } from './download.service';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
 import { UploadService } from './upload.service';
-import { UsageMetricsService } from './usage-metrics.service';
 
 const MAX_FILE_SIZE = 1024 * 1024 * 1024; // 1gb
 
@@ -36,7 +35,6 @@ export class DataController {
     private readonly uploadService: UploadService,
     private readonly downloadService: DownloadService,
     private readonly fileReferenceService: FileReferenceService,
-    private readonly usageMetricsService: UsageMetricsService,
   ) {}
 
   @Post('files')
@@ -127,10 +125,5 @@ export class DataController {
   @Get('file-references')
   getFileReferencesForUser(@UserInContext() user: UsersRow) {
     return this.fileReferenceService.getFileReferences(user.organizationId);
-  }
-
-  @Get('usage-metrics')
-  getUsageMetricsForOrganization(@UserInContext() user: UsersRow) {
-    return this.usageMetricsService.getAllForOrganization(user.organizationId);
   }
 }

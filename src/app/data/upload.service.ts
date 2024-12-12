@@ -1,12 +1,12 @@
-import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { OrganizationsRow } from 'src/DatabaseExtra';
 import { Readable } from 'stream';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
+import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
-import { UsageMetricsService } from './usage-metrics.service';
 
 const BEE_MIN_CHUNK_SIZE = 8192; // chunk + metadata 4K each
 
@@ -38,8 +38,7 @@ export class UploadService {
       }
     }
     const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
-    const metric = await this.validateUploadLimit(organization, size);
-    await this.usageMetricsService.increment(metric, size);
+    await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
     // todo add decrement on failure
     const result = await this.beeService
       .upload(organization.postageBatchId, stream, file.originalname, uploadAsWebsite)
@@ -74,16 +73,6 @@ export class UploadService {
       this.logger.error(e, message);
       throw new BadRequestException();
     }
-  }
-
-  private async validateUploadLimit(organization: OrganizationsRow, size: number) {
-    const metric = await this.usageMetricsService.getForOrganization(organization.id, 'UPLOADED_BYTES');
-
-    const remaining = metric.available - metric.used;
-    if (remaining < size) {
-      throw new UnprocessableEntityException(`Upload limit reached.`);
-    }
-    return metric;
   }
 
   roundUp(numToRound: number, multiple: number) {
