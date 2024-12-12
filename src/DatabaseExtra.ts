@@ -45,6 +45,7 @@ export type OrganizationsRowId = number & { __brand: 'OrganizationsRowId' };
 export interface OrganizationsRow {
   id: OrganizationsRowId;
   name: string;
+  stripeIdentifier: string;
   postageBatchId?: string | null;
   postageBatchStatus?:
     | 'CREATING'
@@ -140,6 +141,7 @@ export interface NewFileReferencesRow {
 
 export interface NewOrganizationsRow {
   name: string;
+  stripeIdentifier: string;
   postageBatchId?: string | null;
   postageBatchStatus?:
     | 'CREATING'

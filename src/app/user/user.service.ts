@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable } from '@nestjs/comm
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { Types } from 'cafe-utility';
+import { Strings, Types } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   getOnlyUsersRowOrNull,
@@ -32,8 +32,9 @@ export class UserService {
   }
 
   async createUser(registerUserDto: RegisterUserDto) {
+    registerUserDto.email = Strings.normalizeEmail(registerUserDto.email);
     await this.verifyUniqueEmail(registerUserDto.email);
-    const organization = await this.organizationService.create(`${registerUserDto.email}'s organization`);
+    const organization = await this.organizationService.create(registerUserDto.email);
     this.usageMetricsService.createInitialMetrics(organization.id);
 
     const emailVerificationCode = this.generateRandomTokenWithTimestamp();

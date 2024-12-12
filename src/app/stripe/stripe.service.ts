@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
-import { Types } from 'cafe-utility';
+import { Strings, Types } from 'cafe-utility';
 import { OrganizationsRowId, PlansRowId } from 'src/DatabaseExtra';
 import Stripe from 'stripe';
-import { PaymentNotificationService } from './payment-notification.service';
-import { PaymentService } from './payment.service';
+import { PaymentNotificationService } from '../payment/payment-notification.service';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class StripeService {
@@ -26,6 +26,14 @@ export class StripeService {
     this.productId = Types.asString(configService.get<string>('STRIPE_PRODUCT_ID'), { name: 'STRIPE_PRODUCT_ID' });
     const apiKey = Types.asString(configService.get<string>('STRIPE_API_KEY'), { name: 'STRIPE_API_KEY' });
     this.stripeClient = new Stripe(apiKey);
+  }
+
+  async createStripeCustomer(email: string) {
+    const customer = await this.stripeClient.customers.create({
+      email: Strings.normalizeEmail(email),
+    });
+
+    return customer.id;
   }
 
   async initPayment(

@@ -14,9 +14,9 @@ import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PaymentService } from '../payment/payment.service';
-import { StripeService } from '../payment/stripe.service';
 import { PlanService } from '../plan/plan.service';
 import { calculateDepthAndAmount, subscriptionConfig } from '../plan/subscriptions';
+import { StripeService } from '../stripe/stripe.service';
 import { StartSubscriptionDto } from './start-subscription.dto';
 
 const DAYS_TO_PURCHASE_POSTAGE_BATCH = 35;

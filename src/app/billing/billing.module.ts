@@ -5,12 +5,13 @@ import { DataModule } from '../data/data.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { PaymentModule } from '../payment/payment.module';
 import { PlanModule } from '../plan/plan.module';
+import { StripeModule } from '../stripe/stripe.module';
 import { BillingController } from './billing.controller';
 import { BillingScheduledService } from './billing.scheduled.service';
 import { BillingService } from './billing.service';
 
 @Module({
-  imports: [PlanModule, DataModule, PaymentModule, BeeModule, OrganizationModule, AlertModule],
+  imports: [PlanModule, DataModule, PaymentModule, BeeModule, OrganizationModule, AlertModule, StripeModule],
   controllers: [BillingController],
   providers: [BillingService, BillingScheduledService],
   exports: [],

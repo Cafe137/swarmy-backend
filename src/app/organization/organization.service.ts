@@ -6,20 +6,24 @@ import {
   OrganizationsRow,
   OrganizationsRowId,
 } from 'src/DatabaseExtra';
+import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
 export class OrganizationService {
   constructor(
     @InjectPinoLogger(OrganizationService.name)
     private readonly logger: PinoLogger,
+    private stripeService: StripeService,
   ) {}
 
   async getOrganization(id: OrganizationsRowId): Promise<OrganizationsRow> {
     return getOnlyOrganizationsRowOrThrow({ id });
   }
 
-  async create(name: string): Promise<OrganizationsRow> {
-    const id = await insertOrganizationsRow({ name });
+  async create(email: string): Promise<OrganizationsRow> {
+    const name = `${email}'s organization`;
+    const stripeIdentifier = await this.stripeService.createStripeCustomer(email);
+    const id = await insertOrganizationsRow({ name, stripeIdentifier });
     this.logger.info('Organization created', name);
     return this.getOrganization(id);
   }
