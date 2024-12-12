@@ -84,11 +84,6 @@ export class PlanService {
     });
   }
 
-  async cancelPlan(organizationId: OrganizationsRowId, planId: PlansRowId) {
-    const plan = await this.getPlanById(organizationId, planId);
-    await updatePlansRow(plan.id, { status: 'CANCELLED' });
-  }
-
   async scheduleActivePlanForCancellation(organizationId: OrganizationsRowId) {
     const existingActivePlan = await this.getActivePlanForOrganization(organizationId);
     if (!existingActivePlan) {

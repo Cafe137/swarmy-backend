@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { getPlansRows, PlansRow, updateOrganizationsRow } from 'src/DatabaseExtra';
+import { getPlansRows, PlansRow, updateOrganizationsRow, updatePlansRow } from 'src/DatabaseExtra';
 import { OrganizationService } from '../organization/organization.service';
 import { PlanService } from '../plan/plan.service';
 
@@ -29,7 +29,7 @@ export class BillingScheduledService {
   async cancelPlan(plan: PlansRow) {
     const organization = await this.organizationService.getOrganization(plan.organizationId);
     this.logger.info(`Cancelling plan ${plan.id} for organization ${organization.id}`);
-    await this.planService.cancelPlan(organization.id, plan.id);
+    await updatePlansRow(plan.id, { status: 'CANCELLED' });
     this.logger.info(`Removing postageBatchId ${organization.postageBatchId} from organization ${organization.id}`);
     await updateOrganizationsRow(organization.id, { postageBatchId: null, postageBatchStatus: 'REMOVED' });
   }
