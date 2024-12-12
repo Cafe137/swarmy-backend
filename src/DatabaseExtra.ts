@@ -47,14 +47,6 @@ export interface OrganizationsRow {
   name: string;
   stripeIdentifier: string;
   postageBatchId?: string | null;
-  postageBatchStatus?:
-    | 'CREATING'
-    | 'CREATED'
-    | 'FAILED_TO_CREATE'
-    | 'FAILED_TO_TOP_UP'
-    | 'FAILED_TO_DILUTE'
-    | 'REMOVED'
-    | null;
   enabled: 0 | 1;
   createdAt: Date;
 }
@@ -86,7 +78,33 @@ export interface PlansRow {
   uploadCountLimit: number;
   uploadSizeLimit: number;
   paidUntil?: Date | null;
-  cancelAt?: Date | null;
+  createdAt: Date;
+}
+
+export type PostageCreationQueueRowId = number & { __brand: 'PostageCreationQueueRowId' };
+export interface PostageCreationQueueRow {
+  id: PostageCreationQueueRowId;
+  organizationId: OrganizationsRowId;
+  depth: number;
+  amount: number;
+  createdAt: Date;
+}
+
+export type PostageDiluteQueueRowId = number & { __brand: 'PostageDiluteQueueRowId' };
+export interface PostageDiluteQueueRow {
+  id: PostageDiluteQueueRowId;
+  organizationId: OrganizationsRowId;
+  postageBatchId: string;
+  depth: number;
+  createdAt: Date;
+}
+
+export type PostageTopUpQueueRowId = number & { __brand: 'PostageTopUpQueueRowId' };
+export interface PostageTopUpQueueRow {
+  id: PostageTopUpQueueRowId;
+  organizationId: OrganizationsRowId;
+  postageBatchId: string;
+  amount: number;
   createdAt: Date;
 }
 
@@ -143,14 +161,6 @@ export interface NewOrganizationsRow {
   name: string;
   stripeIdentifier: string;
   postageBatchId?: string | null;
-  postageBatchStatus?:
-    | 'CREATING'
-    | 'CREATED'
-    | 'FAILED_TO_CREATE'
-    | 'FAILED_TO_TOP_UP'
-    | 'FAILED_TO_DILUTE'
-    | 'REMOVED'
-    | null;
   enabled?: 0 | 1 | null;
   createdAt?: Date | null;
 }
@@ -178,7 +188,27 @@ export interface NewPlansRow {
   uploadCountLimit: number;
   uploadSizeLimit: number;
   paidUntil?: Date | null;
-  cancelAt?: Date | null;
+  createdAt?: Date | null;
+}
+
+export interface NewPostageCreationQueueRow {
+  organizationId: OrganizationsRowId;
+  depth: number;
+  amount: number;
+  createdAt?: Date | null;
+}
+
+export interface NewPostageDiluteQueueRow {
+  organizationId: OrganizationsRowId;
+  postageBatchId: string;
+  depth: number;
+  createdAt?: Date | null;
+}
+
+export interface NewPostageTopUpQueueRow {
+  organizationId: OrganizationsRowId;
+  postageBatchId: string;
+  amount: number;
   createdAt?: Date | null;
 }
 
@@ -329,6 +359,99 @@ export async function getOnlyPlansRowOrThrow(
   return getOnlyRowOrThrow('SELECT * FROM swarmy.plans' + query, ...values) as unknown as PlansRow;
 }
 
+export async function getPostageCreationQueueRows(
+  filter?: Partial<PostageCreationQueueRow>,
+  options?: SelectOptions<PostageCreationQueueRow>,
+): Promise<PostageCreationQueueRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows(
+    'SELECT * FROM swarmy.postageCreationQueue' + query,
+    ...values,
+  ) as unknown as PostageCreationQueueRow[];
+}
+
+export async function getOnlyPostageCreationQueueRowOrNull(
+  filter?: Partial<PostageCreationQueueRow>,
+  options?: SelectOptions<PostageCreationQueueRow>,
+): Promise<PostageCreationQueueRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy.postageCreationQueue' + query,
+    ...values,
+  ) as unknown as PostageCreationQueueRow | null;
+}
+
+export async function getOnlyPostageCreationQueueRowOrThrow(
+  filter?: Partial<PostageCreationQueueRow>,
+  options?: SelectOptions<PostageCreationQueueRow>,
+): Promise<PostageCreationQueueRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow(
+    'SELECT * FROM swarmy.postageCreationQueue' + query,
+    ...values,
+  ) as unknown as PostageCreationQueueRow;
+}
+
+export async function getPostageDiluteQueueRows(
+  filter?: Partial<PostageDiluteQueueRow>,
+  options?: SelectOptions<PostageDiluteQueueRow>,
+): Promise<PostageDiluteQueueRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows('SELECT * FROM swarmy.postageDiluteQueue' + query, ...values) as unknown as PostageDiluteQueueRow[];
+}
+
+export async function getOnlyPostageDiluteQueueRowOrNull(
+  filter?: Partial<PostageDiluteQueueRow>,
+  options?: SelectOptions<PostageDiluteQueueRow>,
+): Promise<PostageDiluteQueueRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy.postageDiluteQueue' + query,
+    ...values,
+  ) as unknown as PostageDiluteQueueRow | null;
+}
+
+export async function getOnlyPostageDiluteQueueRowOrThrow(
+  filter?: Partial<PostageDiluteQueueRow>,
+  options?: SelectOptions<PostageDiluteQueueRow>,
+): Promise<PostageDiluteQueueRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow(
+    'SELECT * FROM swarmy.postageDiluteQueue' + query,
+    ...values,
+  ) as unknown as PostageDiluteQueueRow;
+}
+
+export async function getPostageTopUpQueueRows(
+  filter?: Partial<PostageTopUpQueueRow>,
+  options?: SelectOptions<PostageTopUpQueueRow>,
+): Promise<PostageTopUpQueueRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows('SELECT * FROM swarmy.postageTopUpQueue' + query, ...values) as unknown as PostageTopUpQueueRow[];
+}
+
+export async function getOnlyPostageTopUpQueueRowOrNull(
+  filter?: Partial<PostageTopUpQueueRow>,
+  options?: SelectOptions<PostageTopUpQueueRow>,
+): Promise<PostageTopUpQueueRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy.postageTopUpQueue' + query,
+    ...values,
+  ) as unknown as PostageTopUpQueueRow | null;
+}
+
+export async function getOnlyPostageTopUpQueueRowOrThrow(
+  filter?: Partial<PostageTopUpQueueRow>,
+  options?: SelectOptions<PostageTopUpQueueRow>,
+): Promise<PostageTopUpQueueRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow(
+    'SELECT * FROM swarmy.postageTopUpQueue' + query,
+    ...values,
+  ) as unknown as PostageTopUpQueueRow;
+}
+
 export async function getStaticTextsRows(
   filter?: Partial<StaticTextsRow>,
   options?: SelectOptions<StaticTextsRow>,
@@ -424,6 +547,27 @@ export async function updatePlansRow(id: PlansRowId, object: Partial<NewPlansRow
   await update('swarmy.plans', id, object);
 }
 
+export async function updatePostageCreationQueueRow(
+  id: PostageCreationQueueRowId,
+  object: Partial<NewPostageCreationQueueRow>,
+): Promise<void> {
+  await update('swarmy.postageCreationQueue', id, object);
+}
+
+export async function updatePostageDiluteQueueRow(
+  id: PostageDiluteQueueRowId,
+  object: Partial<NewPostageDiluteQueueRow>,
+): Promise<void> {
+  await update('swarmy.postageDiluteQueue', id, object);
+}
+
+export async function updatePostageTopUpQueueRow(
+  id: PostageTopUpQueueRowId,
+  object: Partial<NewPostageTopUpQueueRow>,
+): Promise<void> {
+  await update('swarmy.postageTopUpQueue', id, object);
+}
+
 export async function updateStaticTextsRow(id: StaticTextsRowId, object: Partial<NewStaticTextsRow>): Promise<void> {
   await update('swarmy.staticTexts', id, object);
 }
@@ -454,6 +598,29 @@ export async function insertPaymentsRow(object: NewPaymentsRow): Promise<Payment
 
 export async function insertPlansRow(object: NewPlansRow): Promise<PlansRowId> {
   return insert('swarmy.plans', object as unknown as Record<string, unknown>) as Promise<PlansRowId>;
+}
+
+export async function insertPostageCreationQueueRow(
+  object: NewPostageCreationQueueRow,
+): Promise<PostageCreationQueueRowId> {
+  return insert(
+    'swarmy.postageCreationQueue',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<PostageCreationQueueRowId>;
+}
+
+export async function insertPostageDiluteQueueRow(object: NewPostageDiluteQueueRow): Promise<PostageDiluteQueueRowId> {
+  return insert(
+    'swarmy.postageDiluteQueue',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<PostageDiluteQueueRowId>;
+}
+
+export async function insertPostageTopUpQueueRow(object: NewPostageTopUpQueueRow): Promise<PostageTopUpQueueRowId> {
+  return insert(
+    'swarmy.postageTopUpQueue',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<PostageTopUpQueueRowId>;
 }
 
 export async function insertStaticTextsRow(object: NewStaticTextsRow): Promise<StaticTextsRowId> {

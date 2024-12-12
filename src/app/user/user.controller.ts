@@ -18,7 +18,7 @@ export class UserController {
     return {
       email: user.email,
       organizationId: organization.id,
-      postageBatchStatus: organization.postageBatchStatus,
+      postageBatchId: organization.postageBatchId,
       emailVerified: user.emailVerified,
     };
   }

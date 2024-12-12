@@ -76,6 +76,12 @@ export class BeeService {
     }
   }
 
+  async getAmountPerDay() {
+    const chainState = await this.bee.getChainState();
+    const pricePer5Seconds = Number(chainState.currentPrice);
+    return pricePer5Seconds * 12 * 60 * 24;
+  }
+
   async isDev() {
     const info = await this.bee.getNodeInfo();
     return info.beeMode === BeeModes.DEV;

@@ -11,7 +11,9 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
 import { MonitorModule } from './monitor/monitor.module';
 import { PaymentModule } from './payment/payment.module';
 import { PlanModule } from './plan/plan.module';
+import { PostageBatchQueueModule } from './postage-batch-queue/postage-batch-queue.module';
 import { StaticTextModule } from './static-text/static-text.module';
+import { UsageMetricsModule } from './usage-metrics/usage-metrics.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -28,6 +30,8 @@ import { UserModule } from './user/user.module';
     StaticTextModule,
     EmailModule,
     MonitorModule,
+    UsageMetricsModule,
+    PostageBatchQueueModule,
 
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
