@@ -152,6 +152,7 @@ export class UserService {
   }
 
   async sendResetPasswordEmail(email: string) {
+    email = Strings.normalizeEmail(email);
     const user = await getOnlyUsersRowOrNull({ email });
     if (!user) {
       this.logger.info(`Use does not exist with email ${email}, not sending password reset email.`);

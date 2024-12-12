@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Types } from 'cafe-utility';
+import { Strings, Types } from 'cafe-utility';
 import { getOnlyUsersRowOrNull } from 'src/DatabaseExtra';
 import { OrganizationService } from '../organization/organization.service';
 
@@ -19,6 +19,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<{ access_token: string }> {
+    email = Strings.normalizeEmail(email);
     const user = await getOnlyUsersRowOrNull({ email });
     if (!user || !user.enabled) {
       throw new UnauthorizedException();
