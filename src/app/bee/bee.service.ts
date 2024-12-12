@@ -1,8 +1,10 @@
 import { BatchId, Bee, BeeModes, Data, FileData } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
-import { Readable } from 'stream';
 import { ConfigService } from '@nestjs/config';
+import { Types } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { Readable } from 'stream';
+import { BZZ } from '../token/bzz';
 
 @Injectable()
 export class BeeService {
@@ -13,7 +15,7 @@ export class BeeService {
     private readonly logger: PinoLogger,
     configService: ConfigService,
   ) {
-    this.bee = new Bee(configService.get<string>('BEE_URL'));
+    this.bee = new Bee(Types.asString(configService.get<string>('BEE_URL'), { name: 'BEE_URL' }));
   }
 
   async download(hash: string, path?: string): Promise<FileData<Data>> {
@@ -21,13 +23,15 @@ export class BeeService {
   }
 
   async upload(postageBatchId: string, data: Readable, fileName: string, uploadAsWebsite?: boolean) {
-    const requestOptions = uploadAsWebsite && {
-      headers: {
-        'Swarm-Index-Document': 'index.html',
-        'Swarm-Collection': 'true',
-      },
-    };
-    const options = uploadAsWebsite && { contentType: 'application/x-tar' };
+    const requestOptions = uploadAsWebsite
+      ? {
+          headers: {
+            'Swarm-Index-Document': 'index.html',
+            'Swarm-Collection': 'true',
+          },
+        }
+      : undefined;
+    const options = uploadAsWebsite ? { contentType: 'application/x-tar' } : undefined;
     return await this.bee.uploadFile(postageBatchId, data, fileName, options, requestOptions);
   }
 
@@ -44,8 +48,7 @@ export class BeeService {
       return 99999999;
     }
     const wallet = await this.getWallet();
-    const bzzBalanceTimes100 = BigInt(wallet.bzzBalance) / 100000000000000n;
-    return Number(bzzBalanceTimes100) / 100;
+    return new BZZ(wallet.bzzBalance).toBZZ(2);
   }
 
   async getPostageBatch(postageBatchId: string) {

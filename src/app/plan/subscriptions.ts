@@ -1,3 +1,5 @@
+import { BZZ } from '../token/bzz';
+
 export const subscriptionConfig = {
   currency: 'EUR',
   storageCapacity: {
@@ -39,17 +41,19 @@ export const subscriptionConfig = {
 };
 
 export function getDepthForRequestedStorage(requestedGbs: number) {
-  return gbToDepthMapping.sort((a, b) => a.depth - b.depth).find((mapping) => mapping.gbs >= requestedGbs).depth;
+  const storage = gbToDepthMapping.sort((a, b) => a.depth - b.depth).find((mapping) => mapping.gbs >= requestedGbs);
+  if (!storage) {
+    throw new Error(`Requested storage ${requestedGbs} is too high`);
+  }
+  return storage.depth;
 }
-
-// export function getCostOfPostageBatch(amount, depth: number) {}
 
 export function calculateDepthAndAmount(days: number, gbs: number) {
   const oneDay = 24000 * 24 * 60 * 12;
   const amount = days * oneDay;
   const depth = getDepthForRequestedStorage(gbs);
-  const bzzPriceTimes100 = (2n ** BigInt(depth) * BigInt(amount)) / 100000000000000n;
-  const bzzPrice = Number(bzzPriceTimes100) / 100;
+  const bzzPrice = new BZZ(2n ** BigInt(depth) * BigInt(amount)).toBZZ(2);
+
   return { amount, depth, bzzPrice };
 }
 

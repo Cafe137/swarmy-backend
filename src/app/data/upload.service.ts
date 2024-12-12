@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { UploadResultDto } from './upload.result.dto';
-import { User } from '../user/user.schema';
-import { UsageMetricsService } from './usage-metrics.service';
-import { FileReferenceService } from './file.service';
-import { BeeService } from '../bee/bee.service';
-import { Readable } from 'stream';
-import { Organization } from '../organization/organization.schema';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { OrganizationsRow } from 'src/DatabaseExtra';
+import { Readable } from 'stream';
+import { AlertService } from '../alert/alert.service';
+import { BeeService } from '../bee/bee.service';
+import { FileReferenceService } from './file.service';
+import { UploadResultDto } from './upload.result.dto';
+import { UsageMetricsService } from './usage-metrics.service';
 
 const BEE_MIN_CHUNK_SIZE = 8192; // chunk + metadata 4K each
 
@@ -18,14 +18,18 @@ export class UploadService {
     private usageMetricsService: UsageMetricsService,
     private fileReferenceService: FileReferenceService,
     private beeService: BeeService,
+    private alertService: AlertService,
   ) {}
 
   async uploadFile(
-    organization: Organization,
+    organization: OrganizationsRow,
     file: Express.Multer.File,
     uploadAsWebsite?: boolean,
-    user?: User,
   ): Promise<UploadResultDto> {
+    if (!organization.postageBatchId) {
+      this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
+      throw new BadRequestException();
+    }
     await this.verifyPostageBatch(organization);
     const stream = Readable.from(file.buffer);
     if (uploadAsWebsite) {
@@ -37,39 +41,43 @@ export class UploadService {
     const metric = await this.validateUploadLimit(organization, size);
     await this.usageMetricsService.increment(metric, size);
     // todo add decrement on failure
-    const result = await this.beeService.upload(
-      organization.postageBatchId,
-      stream,
-      file.originalname,
-      uploadAsWebsite,
-    );
+    const result = await this.beeService
+      .upload(organization.postageBatchId, stream, file.originalname, uploadAsWebsite)
+      .catch((e) => {
+        const message = `Failed to upload file "${file.originalname}" of size ${file.size} for organization ${organization.id}`;
+        this.alertService.sendAlert(message, e);
+        this.logger.error(e, message);
+        throw new BadRequestException('Failed to upload file');
+      });
 
-    const fileRef = await this.fileReferenceService.getFileReference(organization, result.reference);
-    if (fileRef) {
+    const fileReference = await this.fileReferenceService.getFileReference(organization, result.reference);
+    if (fileReference) {
       throw new BadRequestException(`File already uploaded, reference: ${result.reference}`);
     }
 
-    await this.fileReferenceService.createFileReference(result.reference, organization, file, uploadAsWebsite, user);
+    await this.fileReferenceService.createFileReference(result.reference, organization, file, uploadAsWebsite ?? false);
     return { url: result.reference };
   }
 
-  private async verifyPostageBatch(org: Organization) {
-    if (!org.postageBatchId) {
-      this.logger.info(`Upload attempted org ${org._id} that doesn't have a postage batch`);
+  private async verifyPostageBatch(organization: OrganizationsRow) {
+    if (!organization.postageBatchId) {
+      const message = `Upload attempted org ${organization.id} that doesn't have a postage batch`;
+      this.logger.error(message);
+      this.alertService.sendAlert(message);
       throw new BadRequestException();
     }
     try {
-      await this.beeService.getPostageBatch(org.postageBatchId);
+      await this.beeService.getPostageBatch(organization.postageBatchId);
     } catch (e) {
-      this.logger.error(
-        `Upload attempted by org: ${org._id} with postage batch ${org.postageBatchId} that doesn't exist on bee`,
-      );
+      const message = `Upload attempted by org: ${organization.id} with postage batch ${organization.postageBatchId} that doesn't exist on bee`;
+      this.alertService.sendAlert(message, e);
+      this.logger.error(e, message);
       throw new BadRequestException();
     }
   }
 
-  private async validateUploadLimit(organization: Organization, size: number) {
-    const metric = await this.usageMetricsService.getForOrganization(organization._id.toString(), 'UPLOADED_BYTES');
+  private async validateUploadLimit(organization: OrganizationsRow, size: number) {
+    const metric = await this.usageMetricsService.getForOrganization(organization.id, 'UPLOADED_BYTES');
 
     const remaining = metric.available - metric.used;
     if (remaining < size) {
