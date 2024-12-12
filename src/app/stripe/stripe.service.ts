@@ -36,6 +36,17 @@ export class StripeService {
     return customer.id;
   }
 
+  async createPortalSession(stripeIdentifier: string) {
+    const session = await this.stripeClient.billingPortal.sessions.create({
+      customer: stripeIdentifier,
+      return_url: `${this.frontendUrl}/app/billing`,
+    });
+    if (!session.url) {
+      throw Error('No session URL');
+    }
+    return session.url;
+  }
+
   async initPayment(
     organizationId: OrganizationsRowId,
     planId: PlansRowId,

@@ -51,6 +51,10 @@ export class BillingService {
     }
   }
 
+  getPortalSessionUrl(organization: OrganizationsRow) {
+    return this.stripeService.createPortalSession(organization.stripeIdentifier);
+  }
+
   async initSubscriptionProcess(user: UsersRow, payload: StartSubscriptionDto) {
     //todo validate
 
@@ -159,11 +163,5 @@ export class BillingService {
       });
       await this.planService.applyRecurringPayment(payment.organizationId);
     }
-  }
-
-  async cancelPlan(organization: OrganizationsRow) {
-    this.logger.info(`Cancelling plan for organization ${organization.id}.`);
-    await this.planService.scheduleActivePlanForCancellation(organization.id);
-    // todo cancel stripe subscription
   }
 }

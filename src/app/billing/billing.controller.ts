@@ -30,9 +30,9 @@ export class BillingController {
     return this.billingService.initSubscriptionProcess(user, payload);
   }
 
-  @Post('subscriptions/cancel')
+  @Post('subscriptions/manage')
   @HttpCode(200)
-  cancelPlan(@OrganizationInContext() organization: OrganizationsRow) {
-    return this.billingService.cancelPlan(organization);
+  manage(@OrganizationInContext() organization: OrganizationsRow) {
+    return this.billingService.getPortalSessionUrl(organization);
   }
 }
