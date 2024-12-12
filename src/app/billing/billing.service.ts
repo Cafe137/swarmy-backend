@@ -92,7 +92,14 @@ export class BillingService {
     const plan = await getOnlyPlansRowOrThrow({ id: planId });
 
     this.logger.info(`Initializing payment. User: ${user.id} Amount: ${plan.amount} ${plan.currency}`);
-    const result = this.stripeService.initPayment(user.organizationId, plan.id, user.email, totalCents, plan.currency);
+    const organization = await this.organizationService.getOrganization(user.organizationId);
+    const result = this.stripeService.initPayment(
+      user.organizationId,
+      plan.id,
+      organization.stripeIdentifier,
+      totalCents,
+      plan.currency,
+    );
 
     return result;
   }

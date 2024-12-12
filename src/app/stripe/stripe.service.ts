@@ -39,7 +39,7 @@ export class StripeService {
   async initPayment(
     organizationId: OrganizationsRowId,
     planId: PlansRowId,
-    userEmail: string,
+    stripeIdentifier: string,
     amount: number,
     currency: string,
   ) {
@@ -48,7 +48,7 @@ export class StripeService {
 
     const session = await this.stripeClient.checkout.sessions.create({
       billing_address_collection: 'auto',
-      customer_email: userEmail,
+      customer: stripeIdentifier,
       client_reference_id: merchantTransactionId,
       line_items: [
         {
