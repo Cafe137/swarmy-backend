@@ -17,13 +17,12 @@ export class BillingScheduledService {
 
   @Interval(Dates.minutes(5))
   async checkPlansForCancellation() {
-    const plans = (await getPlansRows({ status: 'ACTIVE' })).filter(
-      (plan) => plan.cancelAt && plan.cancelAt.getTime() < Date.now(),
-    );
-
-    this.logger.info(`Cancelling ${plans.length} plans`);
+    const plans = await getPlansRows({ status: 'ACTIVE' });
     for (const plan of plans) {
-      await this.cancelPlan(plan);
+      if (plan.cancelAt && plan.cancelAt.getTime() < Date.now()) {
+        this.logger.info(`Cancelling plan ${plan.id}`);
+        await this.cancelPlan(plan);
+      }
     }
   }
 
