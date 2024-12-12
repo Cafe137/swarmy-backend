@@ -2,7 +2,6 @@ import { PostageBatch } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { Dates } from 'cafe-utility';
-import { InjectPinoLogger } from 'nestjs-pino';
 import { getPlansRows, OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
@@ -11,7 +10,6 @@ import { OrganizationService } from '../organization/organization.service';
 @Injectable()
 export class ExpirationMonitorScheduledService {
   constructor(
-    @InjectPinoLogger(ExpirationMonitorScheduledService.name)
     private beeService: BeeService,
     private organizationService: OrganizationService,
     private alertService: AlertService,
