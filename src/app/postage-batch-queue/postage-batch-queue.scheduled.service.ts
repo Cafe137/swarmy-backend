@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Dates, System } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { runQuery } from 'src/Database';
-import { getPostageCreationQueueRows, getPostageDiluteQueueRows, getPostageTopUpQueueRows } from 'src/DatabaseExtra';
+import {
+  getPostageCreationQueueRows,
+  getPostageDiluteQueueRows,
+  getPostageTopUpQueueRows,
+  updateOrganizationsRow,
+} from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 
@@ -31,7 +36,8 @@ export class PostageBatchQueueScheduledService {
     const createJobs = await getPostageCreationQueueRows();
     for (const createJob of createJobs) {
       try {
-        await this.beeService.createPostageBatch(createJob.amount.toString(), createJob.depth);
+        const postageBatchId = await this.beeService.createPostageBatch(createJob.amount.toString(), createJob.depth);
+        await updateOrganizationsRow(createJob.organizationId, { postageBatchId });
         await runQuery('DELETE FROM postageCreationQueue WHERE id = ?', createJob.id);
       } catch (error) {
         const message = `Create job: Failed to create postage batch for organization ${createJob.organizationId}`;
