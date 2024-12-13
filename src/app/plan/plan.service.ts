@@ -15,6 +15,7 @@ import {
 } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
+import { StripeService } from '../stripe/stripe.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { getDepthForRequestedStorage } from './subscriptions';
 
@@ -28,6 +29,7 @@ export class PlanService {
     private alertService: AlertService,
     private usageMetricsService: UsageMetricsService,
     private beeService: BeeService,
+    private stripeService: StripeService,
   ) {}
 
   async getActivePlanForOrganization(organizationId: OrganizationsRowId): Promise<PlansRow | null> {
@@ -48,13 +50,15 @@ export class PlanService {
       await this.cancelExistingPlanForUpgrade(existingActivePlan, planToActivate);
     }
 
+    const organization = await getOnlyOrganizationsRowOrThrow({ id: organizationId });
+    await this.stripeService.cancelPreviousSubscriptions(organization.stripeIdentifier);
+
     const paidUntil = new Date(Date.now() + Dates.days(31));
     await updatePlansRow(planId, { status: 'ACTIVE', paidUntil });
     const plan = await getOnlyPlansRowOrThrow({ id: planId });
     await this.usageMetricsService.upgradeCurrentMetrics(organizationId, plan.uploadSizeLimit, plan.downloadSizeLimit);
     this.logger.info(`Plan ${planId} activated, proceeding to top up or buy postage batch`);
 
-    const organization = await getOnlyOrganizationsRowOrThrow({ id: organizationId });
     if (existingActivePlan) {
       this.queueDilute(organization, plan);
     } else {

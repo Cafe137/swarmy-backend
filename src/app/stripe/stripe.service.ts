@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
 import { Strings, Types } from 'cafe-utility';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { OrganizationsRowId, PlansRowId } from 'src/DatabaseExtra';
 import Stripe from 'stripe';
+import { AlertService } from '../alert/alert.service';
 import { PaymentNotificationService } from '../payment/payment-notification.service';
 import { PaymentService } from '../payment/payment.service';
 
@@ -15,7 +17,10 @@ export class StripeService {
   private readonly productId: string;
 
   constructor(
+    @InjectPinoLogger(StripeService.name)
+    private readonly logger: PinoLogger,
     configService: ConfigService,
+    private alertService: AlertService,
     private paymentService: PaymentService,
     private paymentNotificationService: PaymentNotificationService,
   ) {
@@ -87,6 +92,24 @@ export class StripeService {
     return {
       redirectUrl: session.url,
     };
+  }
+
+  async cancelPreviousSubscriptions(stripeCustomer: string) {
+    const subscriptions = await this.stripeClient.subscriptions.list({
+      customer: stripeCustomer,
+    });
+    subscriptions.data.sort((a, b) => b.created - a.created);
+    for (const subscription of subscriptions.data.slice(1)) {
+      if (subscription.status !== 'canceled') {
+        try {
+          await this.stripeClient.subscriptions.cancel(subscription.id);
+        } catch (error) {
+          const message = `Failed to cancel subscription ${subscription.id} for customer ${stripeCustomer}`;
+          this.logger.error(message, error);
+          this.alertService.sendAlert(message);
+        }
+      }
+    }
   }
 
   verifyAndParseEvent(requestBody: any, signature: string) {
