@@ -47,7 +47,7 @@ export class BillingScheduledService {
         continue;
       }
       const { batchTTL } = await this.beeService.getPostageBatch(organization.postageBatchId);
-      if (batchTTL / 1000 < Dates.days(3)) {
+      if (batchTTL * 1000 < Dates.days(3)) {
         const existingJobs = await getPostageTopUpQueueRows({ postageBatchId: organization.postageBatchId });
         if (existingJobs.length > 0) {
           continue;
