@@ -84,7 +84,7 @@ export class BillingService {
 
     const planId = await insertPlansRow({
       organizationId: user.organizationId,
-      amount: totalCents / 100,
+      amount: totalCents,
       currency: subscriptionConfig.currency,
       frequency: 'MONTH',
       uploadSizeLimit: storageCapacity * 1024 * 1024 * 1024,
