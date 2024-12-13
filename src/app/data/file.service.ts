@@ -3,6 +3,7 @@ import * as imageThumbnail from 'image-thumbnail';
 import {
   FileReferencesRow,
   getFileReferencesRows,
+  getOnlyFileReferencesRowOrNull,
   getOnlyFileReferencesRowOrThrow,
   insertFileReferencesRow,
   OrganizationsRow,
@@ -37,7 +38,7 @@ export class FileReferenceService {
   }
 
   async getFileReference(organization: OrganizationsRow, hash: string) {
-    return getOnlyFileReferencesRowOrThrow({ organizationId: organization.id, hash });
+    return getOnlyFileReferencesRowOrNull({ organizationId: organization.id, hash });
   }
 
   private isImage(mimetype: string) {
