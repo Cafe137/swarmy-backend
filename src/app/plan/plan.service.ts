@@ -111,10 +111,13 @@ export class PlanService {
     }
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
     const depth = getDepthForRequestedStorage(requestedGbs);
-    await insertPostageDiluteQueueRow({
-      organizationId: organization.id,
-      postageBatchId: organization.postageBatchId,
-      depth,
-    });
+    const postageBatch = await this.beeService.getPostageBatch(organization.postageBatchId);
+    if (depth > postageBatch.depth) {
+      await insertPostageDiluteQueueRow({
+        organizationId: organization.id,
+        postageBatchId: organization.postageBatchId,
+        depth,
+      });
+    }
   }
 }
