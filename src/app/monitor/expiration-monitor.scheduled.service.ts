@@ -19,10 +19,8 @@ export class ExpirationMonitorScheduledService {
   async checkPostageBatchTTL() {
     const plans = await getPlansRows({ status: 'ACTIVE' });
     const batches = await this.beeService.getAllPostageBatches();
-    if (plans.length !== batches.length) {
-      this.alertService.sendAlert(
-        `Mismatch between the number of active plans (${plans.length}) and the number of batches (${batches.length})`,
-      );
+    if (batches.length < plans.length) {
+      this.alertService.sendAlert(`Less batches (${batches.length}) than active plans (${plans.length})`);
     }
     for (const plan of plans) {
       const org = await this.organizationService.getOrganization(plan.organizationId);
