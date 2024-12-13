@@ -18,7 +18,9 @@ export class PostageBatchQueueScheduledService {
     private readonly logger: PinoLogger,
     private alertService: AlertService,
     private beeService: BeeService,
-  ) {}
+  ) {
+    this.runLoop();
+  }
 
   runLoop() {
     System.forever(
