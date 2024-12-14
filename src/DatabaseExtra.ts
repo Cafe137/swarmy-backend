@@ -241,7 +241,7 @@ export async function getApiKeysRows(
   options?: SelectOptions<ApiKeysRow>,
 ): Promise<ApiKeysRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.apiKeys' + query, ...values) as unknown as ApiKeysRow[];
+  return getRows('SELECT * FROM swarmy_test.apiKeys' + query, ...values) as unknown as ApiKeysRow[];
 }
 
 export async function getOnlyApiKeysRowOrNull(
@@ -249,7 +249,7 @@ export async function getOnlyApiKeysRowOrNull(
   options?: SelectOptions<ApiKeysRow>,
 ): Promise<ApiKeysRow | null> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrNull('SELECT * FROM swarmy.apiKeys' + query, ...values) as unknown as ApiKeysRow | null;
+  return getOnlyRowOrNull('SELECT * FROM swarmy_test.apiKeys' + query, ...values) as unknown as ApiKeysRow | null;
 }
 
 export async function getOnlyApiKeysRowOrThrow(
@@ -257,7 +257,7 @@ export async function getOnlyApiKeysRowOrThrow(
   options?: SelectOptions<ApiKeysRow>,
 ): Promise<ApiKeysRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.apiKeys' + query, ...values) as unknown as ApiKeysRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.apiKeys' + query, ...values) as unknown as ApiKeysRow;
 }
 
 export async function getFileReferencesRows(
@@ -265,7 +265,7 @@ export async function getFileReferencesRows(
   options?: SelectOptions<FileReferencesRow>,
 ): Promise<FileReferencesRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.fileReferences' + query, ...values) as unknown as FileReferencesRow[];
+  return getRows('SELECT * FROM swarmy_test.fileReferences' + query, ...values) as unknown as FileReferencesRow[];
 }
 
 export async function getOnlyFileReferencesRowOrNull(
@@ -274,7 +274,7 @@ export async function getOnlyFileReferencesRowOrNull(
 ): Promise<FileReferencesRow | null> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrNull(
-    'SELECT * FROM swarmy.fileReferences' + query,
+    'SELECT * FROM swarmy_test.fileReferences' + query,
     ...values,
   ) as unknown as FileReferencesRow | null;
 }
@@ -284,7 +284,10 @@ export async function getOnlyFileReferencesRowOrThrow(
   options?: SelectOptions<FileReferencesRow>,
 ): Promise<FileReferencesRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.fileReferences' + query, ...values) as unknown as FileReferencesRow;
+  return getOnlyRowOrThrow(
+    'SELECT * FROM swarmy_test.fileReferences' + query,
+    ...values,
+  ) as unknown as FileReferencesRow;
 }
 
 export async function getOrganizationsRows(
@@ -292,7 +295,7 @@ export async function getOrganizationsRows(
   options?: SelectOptions<OrganizationsRow>,
 ): Promise<OrganizationsRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.organizations' + query, ...values) as unknown as OrganizationsRow[];
+  return getRows('SELECT * FROM swarmy_test.organizations' + query, ...values) as unknown as OrganizationsRow[];
 }
 
 export async function getOnlyOrganizationsRowOrNull(
@@ -301,7 +304,7 @@ export async function getOnlyOrganizationsRowOrNull(
 ): Promise<OrganizationsRow | null> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrNull(
-    'SELECT * FROM swarmy.organizations' + query,
+    'SELECT * FROM swarmy_test.organizations' + query,
     ...values,
   ) as unknown as OrganizationsRow | null;
 }
@@ -311,7 +314,7 @@ export async function getOnlyOrganizationsRowOrThrow(
   options?: SelectOptions<OrganizationsRow>,
 ): Promise<OrganizationsRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.organizations' + query, ...values) as unknown as OrganizationsRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.organizations' + query, ...values) as unknown as OrganizationsRow;
 }
 
 export async function getPaymentsRows(
@@ -319,7 +322,7 @@ export async function getPaymentsRows(
   options?: SelectOptions<PaymentsRow>,
 ): Promise<PaymentsRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.payments' + query, ...values) as unknown as PaymentsRow[];
+  return getRows('SELECT * FROM swarmy_test.payments' + query, ...values) as unknown as PaymentsRow[];
 }
 
 export async function getOnlyPaymentsRowOrNull(
@@ -327,7 +330,7 @@ export async function getOnlyPaymentsRowOrNull(
   options?: SelectOptions<PaymentsRow>,
 ): Promise<PaymentsRow | null> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrNull('SELECT * FROM swarmy.payments' + query, ...values) as unknown as PaymentsRow | null;
+  return getOnlyRowOrNull('SELECT * FROM swarmy_test.payments' + query, ...values) as unknown as PaymentsRow | null;
 }
 
 export async function getOnlyPaymentsRowOrThrow(
@@ -335,12 +338,12 @@ export async function getOnlyPaymentsRowOrThrow(
   options?: SelectOptions<PaymentsRow>,
 ): Promise<PaymentsRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.payments' + query, ...values) as unknown as PaymentsRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.payments' + query, ...values) as unknown as PaymentsRow;
 }
 
 export async function getPlansRows(filter?: Partial<PlansRow>, options?: SelectOptions<PlansRow>): Promise<PlansRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.plans' + query, ...values) as unknown as PlansRow[];
+  return getRows('SELECT * FROM swarmy_test.plans' + query, ...values) as unknown as PlansRow[];
 }
 
 export async function getOnlyPlansRowOrNull(
@@ -348,7 +351,7 @@ export async function getOnlyPlansRowOrNull(
   options?: SelectOptions<PlansRow>,
 ): Promise<PlansRow | null> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrNull('SELECT * FROM swarmy.plans' + query, ...values) as unknown as PlansRow | null;
+  return getOnlyRowOrNull('SELECT * FROM swarmy_test.plans' + query, ...values) as unknown as PlansRow | null;
 }
 
 export async function getOnlyPlansRowOrThrow(
@@ -356,7 +359,7 @@ export async function getOnlyPlansRowOrThrow(
   options?: SelectOptions<PlansRow>,
 ): Promise<PlansRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.plans' + query, ...values) as unknown as PlansRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.plans' + query, ...values) as unknown as PlansRow;
 }
 
 export async function getPostageCreationQueueRows(
@@ -365,7 +368,7 @@ export async function getPostageCreationQueueRows(
 ): Promise<PostageCreationQueueRow[]> {
   const [query, values] = buildSelect(filter, options);
   return getRows(
-    'SELECT * FROM swarmy.postageCreationQueue' + query,
+    'SELECT * FROM swarmy_test.postageCreationQueue' + query,
     ...values,
   ) as unknown as PostageCreationQueueRow[];
 }
@@ -376,7 +379,7 @@ export async function getOnlyPostageCreationQueueRowOrNull(
 ): Promise<PostageCreationQueueRow | null> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrNull(
-    'SELECT * FROM swarmy.postageCreationQueue' + query,
+    'SELECT * FROM swarmy_test.postageCreationQueue' + query,
     ...values,
   ) as unknown as PostageCreationQueueRow | null;
 }
@@ -387,7 +390,7 @@ export async function getOnlyPostageCreationQueueRowOrThrow(
 ): Promise<PostageCreationQueueRow> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrThrow(
-    'SELECT * FROM swarmy.postageCreationQueue' + query,
+    'SELECT * FROM swarmy_test.postageCreationQueue' + query,
     ...values,
   ) as unknown as PostageCreationQueueRow;
 }
@@ -397,7 +400,10 @@ export async function getPostageDiluteQueueRows(
   options?: SelectOptions<PostageDiluteQueueRow>,
 ): Promise<PostageDiluteQueueRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.postageDiluteQueue' + query, ...values) as unknown as PostageDiluteQueueRow[];
+  return getRows(
+    'SELECT * FROM swarmy_test.postageDiluteQueue' + query,
+    ...values,
+  ) as unknown as PostageDiluteQueueRow[];
 }
 
 export async function getOnlyPostageDiluteQueueRowOrNull(
@@ -406,7 +412,7 @@ export async function getOnlyPostageDiluteQueueRowOrNull(
 ): Promise<PostageDiluteQueueRow | null> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrNull(
-    'SELECT * FROM swarmy.postageDiluteQueue' + query,
+    'SELECT * FROM swarmy_test.postageDiluteQueue' + query,
     ...values,
   ) as unknown as PostageDiluteQueueRow | null;
 }
@@ -417,7 +423,7 @@ export async function getOnlyPostageDiluteQueueRowOrThrow(
 ): Promise<PostageDiluteQueueRow> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrThrow(
-    'SELECT * FROM swarmy.postageDiluteQueue' + query,
+    'SELECT * FROM swarmy_test.postageDiluteQueue' + query,
     ...values,
   ) as unknown as PostageDiluteQueueRow;
 }
@@ -427,7 +433,7 @@ export async function getPostageTopUpQueueRows(
   options?: SelectOptions<PostageTopUpQueueRow>,
 ): Promise<PostageTopUpQueueRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.postageTopUpQueue' + query, ...values) as unknown as PostageTopUpQueueRow[];
+  return getRows('SELECT * FROM swarmy_test.postageTopUpQueue' + query, ...values) as unknown as PostageTopUpQueueRow[];
 }
 
 export async function getOnlyPostageTopUpQueueRowOrNull(
@@ -436,7 +442,7 @@ export async function getOnlyPostageTopUpQueueRowOrNull(
 ): Promise<PostageTopUpQueueRow | null> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrNull(
-    'SELECT * FROM swarmy.postageTopUpQueue' + query,
+    'SELECT * FROM swarmy_test.postageTopUpQueue' + query,
     ...values,
   ) as unknown as PostageTopUpQueueRow | null;
 }
@@ -447,7 +453,7 @@ export async function getOnlyPostageTopUpQueueRowOrThrow(
 ): Promise<PostageTopUpQueueRow> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrThrow(
-    'SELECT * FROM swarmy.postageTopUpQueue' + query,
+    'SELECT * FROM swarmy_test.postageTopUpQueue' + query,
     ...values,
   ) as unknown as PostageTopUpQueueRow;
 }
@@ -457,7 +463,7 @@ export async function getStaticTextsRows(
   options?: SelectOptions<StaticTextsRow>,
 ): Promise<StaticTextsRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.staticTexts' + query, ...values) as unknown as StaticTextsRow[];
+  return getRows('SELECT * FROM swarmy_test.staticTexts' + query, ...values) as unknown as StaticTextsRow[];
 }
 
 export async function getOnlyStaticTextsRowOrNull(
@@ -465,7 +471,10 @@ export async function getOnlyStaticTextsRowOrNull(
   options?: SelectOptions<StaticTextsRow>,
 ): Promise<StaticTextsRow | null> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrNull('SELECT * FROM swarmy.staticTexts' + query, ...values) as unknown as StaticTextsRow | null;
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy_test.staticTexts' + query,
+    ...values,
+  ) as unknown as StaticTextsRow | null;
 }
 
 export async function getOnlyStaticTextsRowOrThrow(
@@ -473,7 +482,7 @@ export async function getOnlyStaticTextsRowOrThrow(
   options?: SelectOptions<StaticTextsRow>,
 ): Promise<StaticTextsRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.staticTexts' + query, ...values) as unknown as StaticTextsRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.staticTexts' + query, ...values) as unknown as StaticTextsRow;
 }
 
 export async function getUsageMetricsRows(
@@ -481,7 +490,7 @@ export async function getUsageMetricsRows(
   options?: SelectOptions<UsageMetricsRow>,
 ): Promise<UsageMetricsRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.usageMetrics' + query, ...values) as unknown as UsageMetricsRow[];
+  return getRows('SELECT * FROM swarmy_test.usageMetrics' + query, ...values) as unknown as UsageMetricsRow[];
 }
 
 export async function getOnlyUsageMetricsRowOrNull(
@@ -489,7 +498,10 @@ export async function getOnlyUsageMetricsRowOrNull(
   options?: SelectOptions<UsageMetricsRow>,
 ): Promise<UsageMetricsRow | null> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrNull('SELECT * FROM swarmy.usageMetrics' + query, ...values) as unknown as UsageMetricsRow | null;
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy_test.usageMetrics' + query,
+    ...values,
+  ) as unknown as UsageMetricsRow | null;
 }
 
 export async function getOnlyUsageMetricsRowOrThrow(
@@ -497,12 +509,12 @@ export async function getOnlyUsageMetricsRowOrThrow(
   options?: SelectOptions<UsageMetricsRow>,
 ): Promise<UsageMetricsRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.usageMetrics' + query, ...values) as unknown as UsageMetricsRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.usageMetrics' + query, ...values) as unknown as UsageMetricsRow;
 }
 
 export async function getUsersRows(filter?: Partial<UsersRow>, options?: SelectOptions<UsersRow>): Promise<UsersRow[]> {
   const [query, values] = buildSelect(filter, options);
-  return getRows('SELECT * FROM swarmy.users' + query, ...values) as unknown as UsersRow[];
+  return getRows('SELECT * FROM swarmy_test.users' + query, ...values) as unknown as UsersRow[];
 }
 
 export async function getOnlyUsersRowOrNull(
@@ -510,7 +522,7 @@ export async function getOnlyUsersRowOrNull(
   options?: SelectOptions<UsersRow>,
 ): Promise<UsersRow | null> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrNull('SELECT * FROM swarmy.users' + query, ...values) as unknown as UsersRow | null;
+  return getOnlyRowOrNull('SELECT * FROM swarmy_test.users' + query, ...values) as unknown as UsersRow | null;
 }
 
 export async function getOnlyUsersRowOrThrow(
@@ -518,119 +530,125 @@ export async function getOnlyUsersRowOrThrow(
   options?: SelectOptions<UsersRow>,
 ): Promise<UsersRow> {
   const [query, values] = buildSelect(filter, options);
-  return getOnlyRowOrThrow('SELECT * FROM swarmy.users' + query, ...values) as unknown as UsersRow;
+  return getOnlyRowOrThrow('SELECT * FROM swarmy_test.users' + query, ...values) as unknown as UsersRow;
 }
 
 export async function updateApiKeysRow(id: ApiKeysRowId, object: Partial<NewApiKeysRow>): Promise<void> {
-  await update('swarmy.apiKeys', id, object);
+  await update('swarmy_test.apiKeys', id, object);
 }
 
 export async function updateFileReferencesRow(
   id: FileReferencesRowId,
   object: Partial<NewFileReferencesRow>,
 ): Promise<void> {
-  await update('swarmy.fileReferences', id, object);
+  await update('swarmy_test.fileReferences', id, object);
 }
 
 export async function updateOrganizationsRow(
   id: OrganizationsRowId,
   object: Partial<NewOrganizationsRow>,
 ): Promise<void> {
-  await update('swarmy.organizations', id, object);
+  await update('swarmy_test.organizations', id, object);
 }
 
 export async function updatePaymentsRow(id: PaymentsRowId, object: Partial<NewPaymentsRow>): Promise<void> {
-  await update('swarmy.payments', id, object);
+  await update('swarmy_test.payments', id, object);
 }
 
 export async function updatePlansRow(id: PlansRowId, object: Partial<NewPlansRow>): Promise<void> {
-  await update('swarmy.plans', id, object);
+  await update('swarmy_test.plans', id, object);
 }
 
 export async function updatePostageCreationQueueRow(
   id: PostageCreationQueueRowId,
   object: Partial<NewPostageCreationQueueRow>,
 ): Promise<void> {
-  await update('swarmy.postageCreationQueue', id, object);
+  await update('swarmy_test.postageCreationQueue', id, object);
 }
 
 export async function updatePostageDiluteQueueRow(
   id: PostageDiluteQueueRowId,
   object: Partial<NewPostageDiluteQueueRow>,
 ): Promise<void> {
-  await update('swarmy.postageDiluteQueue', id, object);
+  await update('swarmy_test.postageDiluteQueue', id, object);
 }
 
 export async function updatePostageTopUpQueueRow(
   id: PostageTopUpQueueRowId,
   object: Partial<NewPostageTopUpQueueRow>,
 ): Promise<void> {
-  await update('swarmy.postageTopUpQueue', id, object);
+  await update('swarmy_test.postageTopUpQueue', id, object);
 }
 
 export async function updateStaticTextsRow(id: StaticTextsRowId, object: Partial<NewStaticTextsRow>): Promise<void> {
-  await update('swarmy.staticTexts', id, object);
+  await update('swarmy_test.staticTexts', id, object);
 }
 
 export async function updateUsageMetricsRow(id: UsageMetricsRowId, object: Partial<NewUsageMetricsRow>): Promise<void> {
-  await update('swarmy.usageMetrics', id, object);
+  await update('swarmy_test.usageMetrics', id, object);
 }
 
 export async function updateUsersRow(id: UsersRowId, object: Partial<NewUsersRow>): Promise<void> {
-  await update('swarmy.users', id, object);
+  await update('swarmy_test.users', id, object);
 }
 
 export async function insertApiKeysRow(object: NewApiKeysRow): Promise<ApiKeysRowId> {
-  return insert('swarmy.apiKeys', object as unknown as Record<string, unknown>) as Promise<ApiKeysRowId>;
+  return insert('swarmy_test.apiKeys', object as unknown as Record<string, unknown>) as Promise<ApiKeysRowId>;
 }
 
 export async function insertFileReferencesRow(object: NewFileReferencesRow): Promise<FileReferencesRowId> {
-  return insert('swarmy.fileReferences', object as unknown as Record<string, unknown>) as Promise<FileReferencesRowId>;
+  return insert(
+    'swarmy_test.fileReferences',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<FileReferencesRowId>;
 }
 
 export async function insertOrganizationsRow(object: NewOrganizationsRow): Promise<OrganizationsRowId> {
-  return insert('swarmy.organizations', object as unknown as Record<string, unknown>) as Promise<OrganizationsRowId>;
+  return insert(
+    'swarmy_test.organizations',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<OrganizationsRowId>;
 }
 
 export async function insertPaymentsRow(object: NewPaymentsRow): Promise<PaymentsRowId> {
-  return insert('swarmy.payments', object as unknown as Record<string, unknown>) as Promise<PaymentsRowId>;
+  return insert('swarmy_test.payments', object as unknown as Record<string, unknown>) as Promise<PaymentsRowId>;
 }
 
 export async function insertPlansRow(object: NewPlansRow): Promise<PlansRowId> {
-  return insert('swarmy.plans', object as unknown as Record<string, unknown>) as Promise<PlansRowId>;
+  return insert('swarmy_test.plans', object as unknown as Record<string, unknown>) as Promise<PlansRowId>;
 }
 
 export async function insertPostageCreationQueueRow(
   object: NewPostageCreationQueueRow,
 ): Promise<PostageCreationQueueRowId> {
   return insert(
-    'swarmy.postageCreationQueue',
+    'swarmy_test.postageCreationQueue',
     object as unknown as Record<string, unknown>,
   ) as Promise<PostageCreationQueueRowId>;
 }
 
 export async function insertPostageDiluteQueueRow(object: NewPostageDiluteQueueRow): Promise<PostageDiluteQueueRowId> {
   return insert(
-    'swarmy.postageDiluteQueue',
+    'swarmy_test.postageDiluteQueue',
     object as unknown as Record<string, unknown>,
   ) as Promise<PostageDiluteQueueRowId>;
 }
 
 export async function insertPostageTopUpQueueRow(object: NewPostageTopUpQueueRow): Promise<PostageTopUpQueueRowId> {
   return insert(
-    'swarmy.postageTopUpQueue',
+    'swarmy_test.postageTopUpQueue',
     object as unknown as Record<string, unknown>,
   ) as Promise<PostageTopUpQueueRowId>;
 }
 
 export async function insertStaticTextsRow(object: NewStaticTextsRow): Promise<StaticTextsRowId> {
-  return insert('swarmy.staticTexts', object as unknown as Record<string, unknown>) as Promise<StaticTextsRowId>;
+  return insert('swarmy_test.staticTexts', object as unknown as Record<string, unknown>) as Promise<StaticTextsRowId>;
 }
 
 export async function insertUsageMetricsRow(object: NewUsageMetricsRow): Promise<UsageMetricsRowId> {
-  return insert('swarmy.usageMetrics', object as unknown as Record<string, unknown>) as Promise<UsageMetricsRowId>;
+  return insert('swarmy_test.usageMetrics', object as unknown as Record<string, unknown>) as Promise<UsageMetricsRowId>;
 }
 
 export async function insertUsersRow(object: NewUsersRow): Promise<UsersRowId> {
-  return insert('swarmy.users', object as unknown as Record<string, unknown>) as Promise<UsersRowId>;
+  return insert('swarmy_test.users', object as unknown as Record<string, unknown>) as Promise<UsersRowId>;
 }
