@@ -4,10 +4,9 @@ import { BeeModule } from '../bee/bee.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { PlanModule } from '../plan/plan.module';
 import { ExpirationMonitorScheduledService } from './expiration-monitor.scheduled.service';
-import { WalletMonitorScheduledService } from './wallet-monitor.scheduled.service';
 
 @Module({
   imports: [BeeModule, PlanModule, OrganizationModule, AlertModule],
-  providers: [ExpirationMonitorScheduledService, WalletMonitorScheduledService],
+  providers: [ExpirationMonitorScheduledService],
 })
 export class MonitorModule {}

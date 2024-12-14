@@ -82,6 +82,10 @@ export class BeeService {
     return pricePer5Seconds * 12 * 60 * 24;
   }
 
+  async getTopology() {
+    return this.bee.getTopology();
+  }
+
   async isDev() {
     const info = await this.bee.getNodeInfo();
     return info.beeMode === BeeModes.DEV;
