@@ -70,7 +70,7 @@ export class EmailService {
       .catch((error) => {
         const message = `Failed to send email to ${to} with subject ${subject}`;
         this.alertService.sendAlert(message, error);
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         throw error;
       });
   }

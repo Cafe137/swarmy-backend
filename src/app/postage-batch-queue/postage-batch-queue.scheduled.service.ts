@@ -43,7 +43,7 @@ export class PostageBatchQueueScheduledService {
         await runQuery('DELETE FROM postageCreationQueue WHERE id = ?', createJob.id);
       } catch (error) {
         const message = `Create job: Failed to create postage batch for organization ${createJob.organizationId}`;
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         this.alertService.sendAlert(message);
       }
     }
@@ -57,7 +57,7 @@ export class PostageBatchQueueScheduledService {
         await runQuery('DELETE FROM postageTopUpQueue WHERE id = ?', topUpJob.id);
       } catch (error) {
         const message = `Top up job: Failed to top up postage batch for organization ${topUpJob.organizationId}`;
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         this.alertService.sendAlert(message);
       }
     }
@@ -71,7 +71,7 @@ export class PostageBatchQueueScheduledService {
         await runQuery('DELETE FROM postageDiluteQueue WHERE id = ?', diluteJob.id);
       } catch (error) {
         const message = `Dilute job: Failed to dilute postage batch for organization ${diluteJob.organizationId}`;
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         this.alertService.sendAlert(message);
       }
     }
