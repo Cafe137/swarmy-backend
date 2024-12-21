@@ -71,21 +71,28 @@ export async function insert(table: string, object: Record<string, unknown>): Pr
   return _getInsertId(data);
 }
 
-export async function update(table: string, id: number, object: Record<string, unknown>): Promise<void> {
-  delete object.id;
-  const fields = Object.keys(object);
-  const values = Object.values(object);
-  await runQuery(`UPDATE ${table} SET ${fields.map((x) => x + ' = ?').join(', ')} WHERE id = ?`, ...values, id);
+interface AtomicUpdateHelper {
+  key: string;
+  value: unknown;
 }
 
-export async function updateWhere(
+export async function update(
   table: string,
-  key: string,
-  value: string,
+  id: number,
   object: Record<string, unknown>,
-): Promise<void> {
+  atomicHelper?: AtomicUpdateHelper,
+): Promise<number> {
   delete object.id;
   const fields = Object.keys(object);
   const values = Object.values(object);
-  await runQuery(`UPDATE ${table} SET ${fields.map((x) => x + ' = ?').join(', ')} WHERE ${key} = ${value}`, ...values);
+  const result = await runQuery(
+    `UPDATE ${table} SET ${fields.map((x) => x + ' = ?').join(', ')} WHERE id = ?${atomicHelper ? ` AND ${atomicHelper.key} = ?` : ''}`,
+    ...values,
+    id,
+    atomicHelper ? atomicHelper.value : null,
+  );
+  const x = Types.asArray(result);
+  const y = Types.asObject(x[0]);
+  const affectedRows = Types.asNumber(y.affectedRows);
+  return affectedRows;
 }

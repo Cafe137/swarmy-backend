@@ -533,63 +533,125 @@ export async function getOnlyUsersRowOrThrow(
   return getOnlyRowOrThrow('SELECT * FROM swarmy_test.users' + query, ...values) as unknown as UsersRow;
 }
 
-export async function updateApiKeysRow(id: ApiKeysRowId, object: Partial<NewApiKeysRow>): Promise<void> {
-  await update('swarmy_test.apiKeys', id, object);
+export async function updateApiKeysRow(
+  id: ApiKeysRowId,
+  object: Partial<NewApiKeysRow>,
+  atomicHelper?: {
+    key: keyof NewApiKeysRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.apiKeys', id, object, atomicHelper);
 }
 
 export async function updateFileReferencesRow(
   id: FileReferencesRowId,
   object: Partial<NewFileReferencesRow>,
-): Promise<void> {
-  await update('swarmy_test.fileReferences', id, object);
+  atomicHelper?: {
+    key: keyof NewFileReferencesRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.fileReferences', id, object, atomicHelper);
 }
 
 export async function updateOrganizationsRow(
   id: OrganizationsRowId,
   object: Partial<NewOrganizationsRow>,
-): Promise<void> {
-  await update('swarmy_test.organizations', id, object);
+  atomicHelper?: {
+    key: keyof NewOrganizationsRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.organizations', id, object, atomicHelper);
 }
 
-export async function updatePaymentsRow(id: PaymentsRowId, object: Partial<NewPaymentsRow>): Promise<void> {
-  await update('swarmy_test.payments', id, object);
+export async function updatePaymentsRow(
+  id: PaymentsRowId,
+  object: Partial<NewPaymentsRow>,
+  atomicHelper?: {
+    key: keyof NewPaymentsRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.payments', id, object, atomicHelper);
 }
 
-export async function updatePlansRow(id: PlansRowId, object: Partial<NewPlansRow>): Promise<void> {
-  await update('swarmy_test.plans', id, object);
+export async function updatePlansRow(
+  id: PlansRowId,
+  object: Partial<NewPlansRow>,
+  atomicHelper?: {
+    key: keyof NewPlansRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.plans', id, object, atomicHelper);
 }
 
 export async function updatePostageCreationQueueRow(
   id: PostageCreationQueueRowId,
   object: Partial<NewPostageCreationQueueRow>,
-): Promise<void> {
-  await update('swarmy_test.postageCreationQueue', id, object);
+  atomicHelper?: {
+    key: keyof NewPostageCreationQueueRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.postageCreationQueue', id, object, atomicHelper);
 }
 
 export async function updatePostageDiluteQueueRow(
   id: PostageDiluteQueueRowId,
   object: Partial<NewPostageDiluteQueueRow>,
-): Promise<void> {
-  await update('swarmy_test.postageDiluteQueue', id, object);
+  atomicHelper?: {
+    key: keyof NewPostageDiluteQueueRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.postageDiluteQueue', id, object, atomicHelper);
 }
 
 export async function updatePostageTopUpQueueRow(
   id: PostageTopUpQueueRowId,
   object: Partial<NewPostageTopUpQueueRow>,
-): Promise<void> {
-  await update('swarmy_test.postageTopUpQueue', id, object);
+  atomicHelper?: {
+    key: keyof NewPostageTopUpQueueRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.postageTopUpQueue', id, object, atomicHelper);
 }
 
-export async function updateStaticTextsRow(id: StaticTextsRowId, object: Partial<NewStaticTextsRow>): Promise<void> {
-  await update('swarmy_test.staticTexts', id, object);
+export async function updateStaticTextsRow(
+  id: StaticTextsRowId,
+  object: Partial<NewStaticTextsRow>,
+  atomicHelper?: {
+    key: keyof NewStaticTextsRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.staticTexts', id, object, atomicHelper);
 }
 
-export async function updateUsageMetricsRow(id: UsageMetricsRowId, object: Partial<NewUsageMetricsRow>): Promise<void> {
-  await update('swarmy_test.usageMetrics', id, object);
+export async function updateUsageMetricsRow(
+  id: UsageMetricsRowId,
+  object: Partial<NewUsageMetricsRow>,
+  atomicHelper?: {
+    key: keyof NewUsageMetricsRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.usageMetrics', id, object, atomicHelper);
 }
 
-export async function updateUsersRow(id: UsersRowId, object: Partial<NewUsersRow>): Promise<void> {
-  await update('swarmy_test.users', id, object);
+export async function updateUsersRow(
+  id: UsersRowId,
+  object: Partial<NewUsersRow>,
+  atomicHelper?: {
+    key: keyof NewUsersRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy_test.users', id, object, atomicHelper);
 }
 
 export async function insertApiKeysRow(object: NewApiKeysRow): Promise<ApiKeysRowId> {
