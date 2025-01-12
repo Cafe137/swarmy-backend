@@ -32,17 +32,40 @@ uploadEnabled: 0 | 1
 downloadEnabled: 0 | 1
 }
 
+export type FeedItemsRowId = number & { __brand: 'FeedItemsRowId' };
+export interface FeedItemsRow {
+id: FeedItemsRowId
+feedId: FeedsRowId
+fileReferenceId: FileReferencesRowId
+}
+
+export type FeedsRowId = number & { __brand: 'FeedsRowId' };
+export interface FeedsRow {
+id: FeedsRowId
+organizationid: number
+name: string
+privateKey: string
+feedAddress?: string | null
+manifestAddress?: string | null
+lastBzzAddress?: string | null
+updates: number
+createdAt: Date
+updatedAt?: Date | null
+}
+
 export type FileReferencesRowId = number & { __brand: 'FileReferencesRowId' };
 export interface FileReferencesRow {
 id: FileReferencesRowId
+archiveId?: string | null
 organizationId: OrganizationsRowId
 thumbnailBase64?: string | null
 name: string
 contentType: string
-hash: string
+hash?: string | null
 size: number
 hits: number
 isWebsite: 0 | 1
+uploaded: 0 | 1
 createdAt: Date
 }
 
@@ -52,6 +75,7 @@ id: OrganizationsRowId
 name: string
 stripeIdentifier: string
 postageBatchId?: string | null
+beeId?: BeesRowId | null
 enabled: 0 | 1
 createdAt: Date
 }
@@ -120,6 +144,22 @@ label: string
 value: string
 }
 
+export type UploadToBeeQueueRowId = number & { __brand: 'UploadToBeeQueueRowId' };
+export interface UploadToBeeQueueRow {
+id: UploadToBeeQueueRowId
+fileReferenceId: FileReferencesRowId
+pathOnDisk: string
+createdAt: Date
+}
+
+export type UploadToColdStorageQueueRowId = number & { __brand: 'UploadToColdStorageQueueRowId' };
+export interface UploadToColdStorageQueueRow {
+id: UploadToColdStorageQueueRowId
+fileReferenceId: FileReferencesRowId
+pathOnDisk: string
+createdAt: Date
+}
+
 export type UsageMetricsRowId = number & { __brand: 'UsageMetricsRowId' };
 export interface UsageMetricsRow {
 id: UsageMetricsRowId
@@ -159,15 +199,34 @@ uploadEnabled?: 0 | 1 | null
 downloadEnabled?: 0 | 1 | null
 }
 
+export interface NewFeedItemsRow {
+feedId: FeedsRowId
+fileReferenceId: FileReferencesRowId
+}
+
+export interface NewFeedsRow {
+organizationid: number
+name: string
+privateKey: string
+feedAddress?: string | null
+manifestAddress?: string | null
+lastBzzAddress?: string | null
+updates?: number | null
+createdAt?: Date | null
+updatedAt?: Date | null
+}
+
 export interface NewFileReferencesRow {
+archiveId?: string | null
 organizationId: OrganizationsRowId
 thumbnailBase64?: string | null
 name: string
 contentType: string
-hash: string
+hash?: string | null
 size: number
 hits?: number | null
 isWebsite: 0 | 1
+uploaded?: 0 | 1 | null
 createdAt?: Date | null
 }
 
@@ -175,6 +234,7 @@ export interface NewOrganizationsRow {
 name: string
 stripeIdentifier: string
 postageBatchId?: string | null
+beeId?: BeesRowId | null
 enabled?: 0 | 1 | null
 createdAt?: Date | null
 }
@@ -229,6 +289,18 @@ createdAt?: Date | null
 export interface NewStaticTextsRow {
 label: string
 value: string
+}
+
+export interface NewUploadToBeeQueueRow {
+fileReferenceId: FileReferencesRowId
+pathOnDisk: string
+createdAt?: Date | null
+}
+
+export interface NewUploadToColdStorageQueueRow {
+fileReferenceId: FileReferencesRowId
+pathOnDisk: string
+createdAt?: Date | null
 }
 
 export interface NewUsageMetricsRow {
@@ -297,6 +369,54 @@ export async function getOnlyBeesRowOrThrow(
         ): Promise<BeesRow> {
         const [query, values] = buildSelect(filter, options)
         return getOnlyRowOrThrow('SELECT * FROM swarmy_test.bees' + query, ...values) as unknown as BeesRow
+    }
+
+export async function getFeedItemsRows(
+            filter?: Partial<FeedItemsRow>,
+            options?: SelectOptions<FeedItemsRow>
+        ): Promise<FeedItemsRow[]> {
+        const [query, values] = buildSelect(filter, options)
+        return getRows('SELECT * FROM swarmy_test.feedItems' + query, ...values) as unknown as FeedItemsRow[]
+    }
+
+export async function getOnlyFeedItemsRowOrNull(
+            filter?: Partial<FeedItemsRow>,
+            options?: SelectOptions<FeedItemsRow>
+        ): Promise<FeedItemsRow | null> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrNull('SELECT * FROM swarmy_test.feedItems' + query, ...values) as unknown as FeedItemsRow | null
+    }
+
+export async function getOnlyFeedItemsRowOrThrow(
+            filter?: Partial<FeedItemsRow>,
+            options?: SelectOptions<FeedItemsRow>
+        ): Promise<FeedItemsRow> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrThrow('SELECT * FROM swarmy_test.feedItems' + query, ...values) as unknown as FeedItemsRow
+    }
+
+export async function getFeedsRows(
+            filter?: Partial<FeedsRow>,
+            options?: SelectOptions<FeedsRow>
+        ): Promise<FeedsRow[]> {
+        const [query, values] = buildSelect(filter, options)
+        return getRows('SELECT * FROM swarmy_test.feeds' + query, ...values) as unknown as FeedsRow[]
+    }
+
+export async function getOnlyFeedsRowOrNull(
+            filter?: Partial<FeedsRow>,
+            options?: SelectOptions<FeedsRow>
+        ): Promise<FeedsRow | null> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrNull('SELECT * FROM swarmy_test.feeds' + query, ...values) as unknown as FeedsRow | null
+    }
+
+export async function getOnlyFeedsRowOrThrow(
+            filter?: Partial<FeedsRow>,
+            options?: SelectOptions<FeedsRow>
+        ): Promise<FeedsRow> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrThrow('SELECT * FROM swarmy_test.feeds' + query, ...values) as unknown as FeedsRow
     }
 
 export async function getFileReferencesRows(
@@ -491,6 +611,54 @@ export async function getOnlyStaticTextsRowOrThrow(
         return getOnlyRowOrThrow('SELECT * FROM swarmy_test.staticTexts' + query, ...values) as unknown as StaticTextsRow
     }
 
+export async function getUploadToBeeQueueRows(
+            filter?: Partial<UploadToBeeQueueRow>,
+            options?: SelectOptions<UploadToBeeQueueRow>
+        ): Promise<UploadToBeeQueueRow[]> {
+        const [query, values] = buildSelect(filter, options)
+        return getRows('SELECT * FROM swarmy_test.uploadToBeeQueue' + query, ...values) as unknown as UploadToBeeQueueRow[]
+    }
+
+export async function getOnlyUploadToBeeQueueRowOrNull(
+            filter?: Partial<UploadToBeeQueueRow>,
+            options?: SelectOptions<UploadToBeeQueueRow>
+        ): Promise<UploadToBeeQueueRow | null> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrNull('SELECT * FROM swarmy_test.uploadToBeeQueue' + query, ...values) as unknown as UploadToBeeQueueRow | null
+    }
+
+export async function getOnlyUploadToBeeQueueRowOrThrow(
+            filter?: Partial<UploadToBeeQueueRow>,
+            options?: SelectOptions<UploadToBeeQueueRow>
+        ): Promise<UploadToBeeQueueRow> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrThrow('SELECT * FROM swarmy_test.uploadToBeeQueue' + query, ...values) as unknown as UploadToBeeQueueRow
+    }
+
+export async function getUploadToColdStorageQueueRows(
+            filter?: Partial<UploadToColdStorageQueueRow>,
+            options?: SelectOptions<UploadToColdStorageQueueRow>
+        ): Promise<UploadToColdStorageQueueRow[]> {
+        const [query, values] = buildSelect(filter, options)
+        return getRows('SELECT * FROM swarmy_test.uploadToColdStorageQueue' + query, ...values) as unknown as UploadToColdStorageQueueRow[]
+    }
+
+export async function getOnlyUploadToColdStorageQueueRowOrNull(
+            filter?: Partial<UploadToColdStorageQueueRow>,
+            options?: SelectOptions<UploadToColdStorageQueueRow>
+        ): Promise<UploadToColdStorageQueueRow | null> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrNull('SELECT * FROM swarmy_test.uploadToColdStorageQueue' + query, ...values) as unknown as UploadToColdStorageQueueRow | null
+    }
+
+export async function getOnlyUploadToColdStorageQueueRowOrThrow(
+            filter?: Partial<UploadToColdStorageQueueRow>,
+            options?: SelectOptions<UploadToColdStorageQueueRow>
+        ): Promise<UploadToColdStorageQueueRow> {
+        const [query, values] = buildSelect(filter, options)
+        return getOnlyRowOrThrow('SELECT * FROM swarmy_test.uploadToColdStorageQueue' + query, ...values) as unknown as UploadToColdStorageQueueRow
+    }
+
 export async function getUsageMetricsRows(
             filter?: Partial<UsageMetricsRow>,
             options?: SelectOptions<UsageMetricsRow>
@@ -553,6 +721,20 @@ export async function updateBeesRow(id: BeesRowId, object: Partial<NewBeesRow>, 
     return update('swarmy_test.bees', id, object, atomicHelper)
     }
 
+export async function updateFeedItemsRow(id: FeedItemsRowId, object: Partial<NewFeedItemsRow>, atomicHelper?: {
+    key: keyof NewFeedItemsRow
+    value: unknown
+}): Promise<number> {
+    return update('swarmy_test.feedItems', id, object, atomicHelper)
+    }
+
+export async function updateFeedsRow(id: FeedsRowId, object: Partial<NewFeedsRow>, atomicHelper?: {
+    key: keyof NewFeedsRow
+    value: unknown
+}): Promise<number> {
+    return update('swarmy_test.feeds', id, object, atomicHelper)
+    }
+
 export async function updateFileReferencesRow(id: FileReferencesRowId, object: Partial<NewFileReferencesRow>, atomicHelper?: {
     key: keyof NewFileReferencesRow
     value: unknown
@@ -609,6 +791,20 @@ export async function updateStaticTextsRow(id: StaticTextsRowId, object: Partial
     return update('swarmy_test.staticTexts', id, object, atomicHelper)
     }
 
+export async function updateUploadToBeeQueueRow(id: UploadToBeeQueueRowId, object: Partial<NewUploadToBeeQueueRow>, atomicHelper?: {
+    key: keyof NewUploadToBeeQueueRow
+    value: unknown
+}): Promise<number> {
+    return update('swarmy_test.uploadToBeeQueue', id, object, atomicHelper)
+    }
+
+export async function updateUploadToColdStorageQueueRow(id: UploadToColdStorageQueueRowId, object: Partial<NewUploadToColdStorageQueueRow>, atomicHelper?: {
+    key: keyof NewUploadToColdStorageQueueRow
+    value: unknown
+}): Promise<number> {
+    return update('swarmy_test.uploadToColdStorageQueue', id, object, atomicHelper)
+    }
+
 export async function updateUsageMetricsRow(id: UsageMetricsRowId, object: Partial<NewUsageMetricsRow>, atomicHelper?: {
     key: keyof NewUsageMetricsRow
     value: unknown
@@ -629,6 +825,14 @@ export async function insertApiKeysRow(object: NewApiKeysRow): Promise<ApiKeysRo
 
 export async function insertBeesRow(object: NewBeesRow): Promise<BeesRowId> {
         return insert('swarmy_test.bees', object as unknown as Record<string, unknown>) as Promise<BeesRowId>
+    }
+
+export async function insertFeedItemsRow(object: NewFeedItemsRow): Promise<FeedItemsRowId> {
+        return insert('swarmy_test.feedItems', object as unknown as Record<string, unknown>) as Promise<FeedItemsRowId>
+    }
+
+export async function insertFeedsRow(object: NewFeedsRow): Promise<FeedsRowId> {
+        return insert('swarmy_test.feeds', object as unknown as Record<string, unknown>) as Promise<FeedsRowId>
     }
 
 export async function insertFileReferencesRow(object: NewFileReferencesRow): Promise<FileReferencesRowId> {
@@ -661,6 +865,14 @@ export async function insertPostageTopUpQueueRow(object: NewPostageTopUpQueueRow
 
 export async function insertStaticTextsRow(object: NewStaticTextsRow): Promise<StaticTextsRowId> {
         return insert('swarmy_test.staticTexts', object as unknown as Record<string, unknown>) as Promise<StaticTextsRowId>
+    }
+
+export async function insertUploadToBeeQueueRow(object: NewUploadToBeeQueueRow): Promise<UploadToBeeQueueRowId> {
+        return insert('swarmy_test.uploadToBeeQueue', object as unknown as Record<string, unknown>) as Promise<UploadToBeeQueueRowId>
+    }
+
+export async function insertUploadToColdStorageQueueRow(object: NewUploadToColdStorageQueueRow): Promise<UploadToColdStorageQueueRowId> {
+        return insert('swarmy_test.uploadToColdStorageQueue', object as unknown as Record<string, unknown>) as Promise<UploadToColdStorageQueueRowId>
     }
 
 export async function insertUsageMetricsRow(object: NewUsageMetricsRow): Promise<UsageMetricsRowId> {

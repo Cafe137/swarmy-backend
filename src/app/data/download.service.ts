@@ -48,7 +48,7 @@ export class DownloadService {
       this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
       throw new BadRequestException();
     }
-    const batch = await this.beeService.getPostageBatch(organization.postageBatchId);
+    const batch = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
     if (!batch) {
       const message = `Download attempted with postage batch id ${organization.postageBatchId} that doesn't exist on bee`;
       this.alertService.sendAlert(message);

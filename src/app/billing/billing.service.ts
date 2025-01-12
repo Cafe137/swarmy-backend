@@ -15,11 +15,9 @@ import { BeeService } from '../bee/bee.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PaymentService } from '../payment/payment.service';
 import { PlanService } from '../plan/plan.service';
-import { calculateDepthAndAmount, subscriptionConfig } from '../plan/subscriptions';
+import { subscriptionConfig } from '../plan/subscriptions';
 import { StripeService } from '../stripe/stripe.service';
 import { StartSubscriptionDto } from './start-subscription.dto';
-
-const DAYS_TO_PURCHASE_POSTAGE_BATCH = 35;
 
 @Injectable()
 export class BillingService {
@@ -72,8 +70,6 @@ export class BillingService {
       throw new BadRequestException(message);
     }
 
-    await this.verifyWalletBalance(DAYS_TO_PURCHASE_POSTAGE_BATCH, selectedStorageOption.size);
-
     const storageCapacity = selectedStorageOption.size;
     const bandwidth = selectedBandwidthOption.size;
     const storageAmount = storageCapacity * subscriptionConfig.storageCapacity.pricePerGb;
@@ -106,17 +102,6 @@ export class BillingService {
     );
 
     return result;
-  }
-
-  private async verifyWalletBalance(days: number, gbs: number) {
-    const bzzBalance = await this.beeService.getWalletBzzBalance();
-    const result = calculateDepthAndAmount(days, gbs);
-
-    if (bzzBalance <= result.bzzPrice) {
-      const message = `Can't initialize subscription. Wallet balance is insufficient. Available: ${bzzBalance} Required: ${result.bzzPrice}`;
-      this.alertService.sendAlert(message);
-      throw new InternalServerErrorException(message);
-    }
   }
 
   private async handleCheckoutSessionCompleted(merchantTransactionId: string, stripeCustomerId: string) {

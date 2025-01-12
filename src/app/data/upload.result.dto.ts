@@ -1,1 +1,3 @@
-export class UploadResultDto {}
+export class UploadResultDto {
+  id: number;
+}
