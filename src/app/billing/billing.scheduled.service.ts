@@ -46,7 +46,7 @@ export class BillingScheduledService {
         this.alertService.sendAlert(message);
         continue;
       }
-      const { batchTTL } = await this.beeService.getPostageBatch(organization.postageBatchId);
+      const { batchTTL } = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
       if (batchTTL * 1000 < Dates.days(3)) {
         const existingJobs = await getPostageTopUpQueueRows({ postageBatchId: organization.postageBatchId });
         if (existingJobs.length > 0) {
@@ -66,6 +66,6 @@ export class BillingScheduledService {
     this.logger.info(`Cancelling plan ${plan.id} for organization ${organization.id}`);
     await updatePlansRow(plan.id, { status: 'CANCELLED' });
     this.logger.info(`Removing postageBatchId ${organization.postageBatchId} from organization ${organization.id}`);
-    await updateOrganizationsRow(organization.id, { postageBatchId: null });
+    await updateOrganizationsRow(organization.id, { postageBatchId: null, beeId: null });
   }
 }

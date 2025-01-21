@@ -48,7 +48,7 @@ export class DataController {
     )
     file: Express.Multer.File,
     @Body() body: any,
-  ): UploadResultDto {
+  ): Promise<UploadResultDto> {
     return this.uploadService.uploadFile(organization, file, body.website);
   }
 
@@ -65,7 +65,7 @@ export class DataController {
     )
     file: Express.Multer.File,
     @Query('website') website: boolean,
-  ): UploadResultDto {
+  ): Promise<UploadResultDto> {
     return this.uploadService.uploadFile(organization, file, website);
   }
 

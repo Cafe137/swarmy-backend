@@ -9,9 +9,32 @@ import { DataController } from './data.controller';
 import { DownloadService } from './download.service';
 import { FileReferenceService } from './file.service';
 import { UploadService } from './upload.service';
+import { MulterModule } from '@nestjs/platform-express';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { diskStorage } from 'multer';
 
 @Module({
-  imports: [AlertModule, ApiKeyModule, BeeModule, OrganizationModule, PlanModule, UsageMetricsModule],
+  imports: [
+    AlertModule,
+    ApiKeyModule,
+    BeeModule,
+    OrganizationModule,
+    PlanModule,
+    UsageMetricsModule,
+    MulterModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        storage: diskStorage({
+          destination: configService.get<string>('MULTER_DEST'),
+          filename: (req, file, cb) => {
+            const filename = `${Date.now()}-${file.originalname}`;
+            cb(null, filename);
+          },
+        }),
+      }),
+      inject: [ConfigService],
+    }),
+  ],
   controllers: [DataController],
   providers: [UploadService, FileReferenceService, DownloadService],
   exports: [],

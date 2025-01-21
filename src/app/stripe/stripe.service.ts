@@ -105,7 +105,7 @@ export class StripeService {
           await this.stripeClient.subscriptions.cancel(subscription.id);
         } catch (error) {
           const message = `Failed to cancel subscription ${subscription.id} for customer ${stripeCustomer}`;
-          this.logger.error(message, error);
+          this.logger.error(error, message);
           this.alertService.sendAlert(message);
         }
       }

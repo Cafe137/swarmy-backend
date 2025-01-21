@@ -20,6 +20,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
+    "@aws-sdk/client-glacier": "^3.721.0",
     "@ethersphere/bee-js": "^8.3.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",

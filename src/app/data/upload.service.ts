@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { OrganizationsRow } from 'src/DatabaseExtra';
-import { Readable } from 'stream';
+import { insertUploadToBeeQueueRow, OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
+import * as fs from 'node:fs';
 
 const BEE_MIN_CHUNK_SIZE = 8192; // chunk + metadata 4K each
 
@@ -28,34 +28,27 @@ export class UploadService {
   ): Promise<UploadResultDto> {
     if (!organization.postageBatchId) {
       this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
+      fs.rmSync(file.path);
       throw new BadRequestException();
     }
     await this.verifyPostageBatch(organization);
-    const stream = Readable.from(file.buffer);
     if (uploadAsWebsite) {
       if (!['application/x-tar', 'application/octet-stream'].includes(file.mimetype)) {
+        fs.rmSync(file.path);
         throw new BadRequestException('Not a .tar file');
       }
     }
     const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
-    // todo add decrement on failure
-    const result = await this.beeService
-      .upload(organization.postageBatchId, stream, file.originalname, uploadAsWebsite)
-      .catch((e) => {
-        const message = `Failed to upload file "${file.originalname}" of size ${file.size} for organization ${organization.id}`;
-        this.alertService.sendAlert(message, e);
-        this.logger.error(e, message);
-        throw new BadRequestException('Failed to upload file');
-      });
 
-    const fileReference = await this.fileReferenceService.getFileReference(organization, result.reference);
-    if (fileReference) {
-      throw new BadRequestException(`File already uploaded, reference: ${result.reference}`);
-    }
+    const fileRef = await this.fileReferenceService.createFileReference(
+      organization,
+      file,
+      uploadAsWebsite ?? false,
+    );
 
-    await this.fileReferenceService.createFileReference(result.reference, organization, file, uploadAsWebsite ?? false);
-    return { url: result.reference };
+    await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: file.path });
+    return { id: fileRef.id };
   }
 
   private async verifyPostageBatch(organization: OrganizationsRow) {
@@ -66,7 +59,7 @@ export class UploadService {
       throw new BadRequestException();
     }
     try {
-      await this.beeService.getPostageBatch(organization.postageBatchId);
+      await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
     } catch (e) {
       const message = `Upload attempted by org: ${organization.id} with postage batch ${organization.postageBatchId} that doesn't exist on bee`;
       this.alertService.sendAlert(message, e);

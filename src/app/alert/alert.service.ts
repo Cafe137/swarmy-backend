@@ -26,7 +26,7 @@ export class AlertService {
         text: error ? `${message} ${Strings.represent(error)}` : message,
       })
       .catch((e) => {
-        this.logger.error('Failed to send alert', e);
+        this.logger.error(e, 'Failed to send alert');
       });
   }
 }

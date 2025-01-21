@@ -27,6 +27,16 @@ export interface ApiKeysRow {
   createdAt: Date;
 }
 
+export type BeesRowId = number & { __brand: 'BeesRowId' };
+export interface BeesRow {
+  id: BeesRowId;
+  name: string;
+  url: string;
+  enabled: 0 | 1;
+  uploadEnabled: 0 | 1;
+  downloadEnabled: 0 | 1;
+}
+
 export type CryptoPaymentRemindersRowId = number & { __brand: 'CryptoPaymentRemindersRowId' };
 export interface CryptoPaymentRemindersRow {
   id: CryptoPaymentRemindersRowId;
@@ -93,6 +103,7 @@ export interface OrganizationsRow {
   stripeIdentifier: string;
   postageBatchId?: string | null;
   enabled: 0 | 1;
+  beeId: BeesRowId;
   createdAt: Date;
 }
 
@@ -161,6 +172,22 @@ export interface StaticTextsRow {
   value: string;
 }
 
+export type UploadToBeeQueueRowId = number & { __brand: 'UploadToBeeQueueRowId' };
+export interface UploadToBeeQueueRow {
+  id: UploadToBeeQueueRowId;
+  fileReferenceId: FileReferencesRowId;
+  pathOnDisk: string;
+  createdAt: Date;
+}
+
+export type UploadToColdStorageQueueRowId = number & { __brand: 'UploadToColdStorageQueueRowId' };
+export interface UploadToColdStorageQueueRow {
+  id: UploadToColdStorageQueueRowId;
+  fileReferenceId: FileReferencesRowId;
+  pathOnDisk: string;
+  createdAt: Date;
+}
+
 export type UsageMetricsRowId = number & { __brand: 'UsageMetricsRowId' };
 export interface UsageMetricsRow {
   id: UsageMetricsRowId;
@@ -189,6 +216,14 @@ export interface NewApiKeysRow {
   apiKey: string;
   status: 'ACTIVE' | 'REVOKED';
   createdAt?: Date | null;
+}
+
+export interface NewBeesRow {
+  name: string;
+  url: string;
+  enabled?: 0 | 1 | null;
+  uploadEnabled?: 0 | 1 | null;
+  downloadEnabled?: 0 | 1 | null;
 }
 
 export interface NewCryptoPaymentRemindersRow {
@@ -245,6 +280,7 @@ export interface NewOrganizationsRow {
   stripeIdentifier: string;
   postageBatchId?: string | null;
   enabled?: 0 | 1 | null;
+  beeId: BeesRowId;
   createdAt?: Date | null;
 }
 
@@ -301,6 +337,18 @@ export interface NewStaticTextsRow {
   value: string;
 }
 
+export interface NewUploadToBeeQueueRow {
+  fileReferenceId: FileReferencesRowId;
+  pathOnDisk: string;
+  createdAt?: Date | null;
+}
+
+export interface NewUploadToColdStorageQueueRow {
+  fileReferenceId: FileReferencesRowId;
+  pathOnDisk: string;
+  createdAt?: Date | null;
+}
+
 export interface NewUsageMetricsRow {
   organizationId: OrganizationsRowId;
   type: 'UPLOADED_BYTES' | 'DOWNLOADED_BYTES';
@@ -342,6 +390,27 @@ export async function getOnlyApiKeysRowOrThrow(
 ): Promise<ApiKeysRow> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrThrow('SELECT * FROM swarmy.apiKeys' + query, ...values) as unknown as ApiKeysRow;
+}
+
+export async function getBeesRows(filter?: Partial<BeesRow>, options?: SelectOptions<BeesRow>): Promise<BeesRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows('SELECT * FROM swarmy.bees' + query, ...values) as unknown as BeesRow[];
+}
+
+export async function getOnlyBeesRowOrNull(
+  filter?: Partial<BeesRow>,
+  options?: SelectOptions<BeesRow>,
+): Promise<BeesRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull('SELECT * FROM swarmy.bees' + query, ...values) as unknown as BeesRow | null;
+}
+
+export async function getOnlyBeesRowOrThrow(
+  filter?: Partial<BeesRow>,
+  options?: SelectOptions<BeesRow>,
+): Promise<BeesRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow('SELECT * FROM swarmy.bees' + query, ...values) as unknown as BeesRow;
 }
 
 export async function getCryptoPaymentRemindersRows(
@@ -665,6 +734,69 @@ export async function getOnlyStaticTextsRowOrThrow(
   return getOnlyRowOrThrow('SELECT * FROM swarmy.staticTexts' + query, ...values) as unknown as StaticTextsRow;
 }
 
+export async function getUploadToBeeQueueRows(
+  filter?: Partial<UploadToBeeQueueRow>,
+  options?: SelectOptions<UploadToBeeQueueRow>,
+): Promise<UploadToBeeQueueRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows('SELECT * FROM swarmy.uploadToBeeQueue' + query, ...values) as unknown as UploadToBeeQueueRow[];
+}
+
+export async function getOnlyUploadToBeeQueueRowOrNull(
+  filter?: Partial<UploadToBeeQueueRow>,
+  options?: SelectOptions<UploadToBeeQueueRow>,
+): Promise<UploadToBeeQueueRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy.uploadToBeeQueue' + query,
+    ...values,
+  ) as unknown as UploadToBeeQueueRow | null;
+}
+
+export async function getOnlyUploadToBeeQueueRowOrThrow(
+  filter?: Partial<UploadToBeeQueueRow>,
+  options?: SelectOptions<UploadToBeeQueueRow>,
+): Promise<UploadToBeeQueueRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow(
+    'SELECT * FROM swarmy.uploadToBeeQueue' + query,
+    ...values,
+  ) as unknown as UploadToBeeQueueRow;
+}
+
+export async function getUploadToColdStorageQueueRows(
+  filter?: Partial<UploadToColdStorageQueueRow>,
+  options?: SelectOptions<UploadToColdStorageQueueRow>,
+): Promise<UploadToColdStorageQueueRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows(
+    'SELECT * FROM swarmy.uploadToColdStorageQueue' + query,
+    ...values,
+  ) as unknown as UploadToColdStorageQueueRow[];
+}
+
+export async function getOnlyUploadToColdStorageQueueRowOrNull(
+  filter?: Partial<UploadToColdStorageQueueRow>,
+  options?: SelectOptions<UploadToColdStorageQueueRow>,
+): Promise<UploadToColdStorageQueueRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull(
+    'SELECT * FROM swarmy.uploadToColdStorageQueue' + query,
+    ...values,
+  ) as unknown as UploadToColdStorageQueueRow | null;
+}
+
+export async function getOnlyUploadToColdStorageQueueRowOrThrow(
+  filter?: Partial<UploadToColdStorageQueueRow>,
+  options?: SelectOptions<UploadToColdStorageQueueRow>,
+): Promise<UploadToColdStorageQueueRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow(
+    'SELECT * FROM swarmy.uploadToColdStorageQueue' + query,
+    ...values,
+  ) as unknown as UploadToColdStorageQueueRow;
+}
+
 export async function getUsageMetricsRows(
   filter?: Partial<UsageMetricsRow>,
   options?: SelectOptions<UsageMetricsRow>,
@@ -719,6 +851,17 @@ export async function updateApiKeysRow(
   },
 ): Promise<number> {
   return update('swarmy.apiKeys', id, object, atomicHelper);
+}
+
+export async function updateBeesRow(
+  id: BeesRowId,
+  object: Partial<NewBeesRow>,
+  atomicHelper?: {
+    key: keyof NewBeesRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy.bees', id, object, atomicHelper);
 }
 
 export async function updateCryptoPaymentRemindersRow(
@@ -853,6 +996,28 @@ export async function updateStaticTextsRow(
   return update('swarmy.staticTexts', id, object, atomicHelper);
 }
 
+export async function updateUploadToBeeQueueRow(
+  id: UploadToBeeQueueRowId,
+  object: Partial<NewUploadToBeeQueueRow>,
+  atomicHelper?: {
+    key: keyof NewUploadToBeeQueueRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy.uploadToBeeQueue', id, object, atomicHelper);
+}
+
+export async function updateUploadToColdStorageQueueRow(
+  id: UploadToColdStorageQueueRowId,
+  object: Partial<NewUploadToColdStorageQueueRow>,
+  atomicHelper?: {
+    key: keyof NewUploadToColdStorageQueueRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy.uploadToColdStorageQueue', id, object, atomicHelper);
+}
+
 export async function updateUsageMetricsRow(
   id: UsageMetricsRowId,
   object: Partial<NewUsageMetricsRow>,
@@ -877,6 +1042,10 @@ export async function updateUsersRow(
 
 export async function insertApiKeysRow(object: NewApiKeysRow): Promise<ApiKeysRowId> {
   return insert('swarmy.apiKeys', object as unknown as Record<string, unknown>) as Promise<ApiKeysRowId>;
+}
+
+export async function insertBeesRow(object: NewBeesRow): Promise<BeesRowId> {
+  return insert('swarmy.bees', object as unknown as Record<string, unknown>) as Promise<BeesRowId>;
 }
 
 export async function insertCryptoPaymentRemindersRow(
@@ -941,6 +1110,22 @@ export async function insertPostageTopUpQueueRow(object: NewPostageTopUpQueueRow
 
 export async function insertStaticTextsRow(object: NewStaticTextsRow): Promise<StaticTextsRowId> {
   return insert('swarmy.staticTexts', object as unknown as Record<string, unknown>) as Promise<StaticTextsRowId>;
+}
+
+export async function insertUploadToBeeQueueRow(object: NewUploadToBeeQueueRow): Promise<UploadToBeeQueueRowId> {
+  return insert(
+    'swarmy.uploadToBeeQueue',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<UploadToBeeQueueRowId>;
+}
+
+export async function insertUploadToColdStorageQueueRow(
+  object: NewUploadToColdStorageQueueRow,
+): Promise<UploadToColdStorageQueueRowId> {
+  return insert(
+    'swarmy.uploadToColdStorageQueue',
+    object as unknown as Record<string, unknown>,
+  ) as Promise<UploadToColdStorageQueueRowId>;
 }
 
 export async function insertUsageMetricsRow(object: NewUsageMetricsRow): Promise<UsageMetricsRowId> {

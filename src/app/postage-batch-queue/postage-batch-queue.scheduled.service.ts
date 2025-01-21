@@ -3,6 +3,7 @@ import { Dates, System } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { runQuery } from 'src/Database';
 import {
+  getOnlyOrganizationsRowOrThrow,
   getPostageCreationQueueRows,
   getPostageDiluteQueueRows,
   getPostageTopUpQueueRows,
@@ -30,7 +31,9 @@ export class PostageBatchQueueScheduledService {
         await this.diluteStamps();
       },
       Dates.seconds(5),
-      this.logger.error,
+      (m, e) => {
+        this.logger.error(e, m);
+      },
     );
   }
 
@@ -38,12 +41,15 @@ export class PostageBatchQueueScheduledService {
     const createJobs = await getPostageCreationQueueRows();
     for (const createJob of createJobs) {
       try {
-        const postageBatchId = await this.beeService.createPostageBatch(createJob.amount.toString(), createJob.depth);
-        await updateOrganizationsRow(createJob.organizationId, { postageBatchId });
+        const { postageBatchId, beeId } = await this.beeService.createPostageBatch(
+          createJob.amount.toString(),
+          createJob.depth,
+        );
+        await updateOrganizationsRow(createJob.organizationId, { postageBatchId, beeId });
         await runQuery('DELETE FROM postageCreationQueue WHERE id = ?', createJob.id);
       } catch (error) {
         const message = `Create job: Failed to create postage batch for organization ${createJob.organizationId}`;
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         this.alertService.sendAlert(message);
       }
     }
@@ -53,11 +59,12 @@ export class PostageBatchQueueScheduledService {
     const topUpJobs = await getPostageTopUpQueueRows();
     for (const topUpJob of topUpJobs) {
       try {
-        await this.beeService.topUp(topUpJob.postageBatchId, topUpJob.amount.toString());
+        const org = await getOnlyOrganizationsRowOrThrow({ id: topUpJob.organizationId });
+        await this.beeService.topUp(org.beeId!, topUpJob.postageBatchId, topUpJob.amount.toString());
         await runQuery('DELETE FROM postageTopUpQueue WHERE id = ?', topUpJob.id);
       } catch (error) {
         const message = `Top up job: Failed to top up postage batch for organization ${topUpJob.organizationId}`;
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         this.alertService.sendAlert(message);
       }
     }
@@ -67,11 +74,12 @@ export class PostageBatchQueueScheduledService {
     const diluteJobs = await getPostageDiluteQueueRows();
     for (const diluteJob of diluteJobs) {
       try {
-        await this.beeService.dilute(diluteJob.postageBatchId, diluteJob.depth);
+        const org = await getOnlyOrganizationsRowOrThrow({ id: diluteJob.organizationId });
+        await this.beeService.dilute(org.beeId!, diluteJob.postageBatchId, diluteJob.depth);
         await runQuery('DELETE FROM postageDiluteQueue WHERE id = ?', diluteJob.id);
       } catch (error) {
         const message = `Dilute job: Failed to dilute postage batch for organization ${diluteJob.organizationId}`;
-        this.logger.error(message, error);
+        this.logger.error(error, message);
         this.alertService.sendAlert(message);
       }
     }

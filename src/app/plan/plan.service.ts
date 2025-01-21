@@ -111,7 +111,7 @@ export class PlanService {
     }
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
     const depth = getDepthForRequestedStorage(requestedGbs);
-    const postageBatch = await this.beeService.getPostageBatch(organization.postageBatchId);
+    const postageBatch = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
     if (depth > postageBatch.depth) {
       await insertPostageDiluteQueueRow({
         organizationId: organization.id,

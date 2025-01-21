@@ -15,6 +15,7 @@ import { PostageBatchQueueModule } from './postage-batch-queue/postage-batch-que
 import { StaticTextModule } from './static-text/static-text.module';
 import { UsageMetricsModule } from './usage-metrics/usage-metrics.module';
 import { UserModule } from './user/user.module';
+import { UploadQueueModule } from './upload-queue/upload-queue.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module';
     MonitorModule,
     UsageMetricsModule,
     PostageBatchQueueModule,
+    UploadQueueModule,
 
     LoggerModule.forRootAsync({
       imports: [ConfigModule],

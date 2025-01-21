@@ -35,12 +35,16 @@ export class HealthcheckService {
       this.alertService.sendAlert(message);
       throw new InternalServerErrorException(message);
     }
-    const balance = await this.beeService.getWalletBzzBalance();
-    if (balance < 20) {
-      const message = `Low balance: ${balance}`;
-      this.logger.error(message);
-      this.alertService.sendAlert(message);
-      throw new InternalServerErrorException(message);
+    const balances = await this.beeService.getWalletBzzBalances();
+
+    for (const balanceResult of balances) {
+      if (balanceResult.balance < 20) {
+        const message = `Low balance: ${balanceResult.balance} on ${balanceResult.beeNode.beeRow.name}`;
+        this.logger.error(message);
+        this.alertService.sendAlert(message);
+        throw new InternalServerErrorException(message);
+      }
     }
+
   }
 }

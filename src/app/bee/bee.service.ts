@@ -1,106 +1,98 @@
-import { BatchId, Bee, BeeModes, Data, FileData, NULL_TOPIC, Reference } from '@ethersphere/bee-js';
+import { BatchId, Data, FileData, NULL_TOPIC, PostageBatch, Reference } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Binary, Elliptic, Types } from 'cafe-utility';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { Binary, Elliptic } from 'cafe-utility';
 import { Readable } from 'stream';
-import { BZZ } from '../token/bzz';
+import { BeesRowId, getOnlyOrganizationsRowOrThrow, OrganizationsRowId } from '../../DatabaseExtra';
+import { BeeHiveService } from './bee-hive.service';
+import { BeeNode } from './bee-node';
+
+const AMOUNT_FOR_ONE_DAY = 414720000;
 
 @Injectable()
 export class BeeService {
-  private bee: Bee;
-
-  constructor(
-    @InjectPinoLogger(BeeService.name)
-    private readonly logger: PinoLogger,
-    configService: ConfigService,
-  ) {
-    this.bee = new Bee(Types.asString(configService.get<string>('BEE_URL'), { name: 'BEE_URL' }));
-  }
+  constructor(private readonly beeHive: BeeHiveService) {}
 
   async download(hash: string, path?: string): Promise<FileData<Data>> {
-    return await this.bee.downloadFile(hash, path);
+    const bee = this.beeHive.getBeeForDownload();
+    return bee.download(hash, path);
   }
 
-  async upload(postageBatchId: string, data: Readable, fileName: string, uploadAsWebsite?: boolean) {
-    const requestOptions = uploadAsWebsite
-      ? {
-          headers: {
-            'Swarm-Index-Document': 'index.html',
-            'Swarm-Collection': 'true',
-          },
-        }
-      : undefined;
-    const options = uploadAsWebsite ? { contentType: 'application/x-tar' } : undefined;
-    return await this.bee.uploadFile(postageBatchId, data, fileName, options, requestOptions);
+  async upload(beeId: BeesRowId, postageBatchId: string, data: Readable, fileName: string, uploadAsWebsite?: boolean) {
+    const bee = await this.beeHive.getBeeById(beeId);
+    return await bee.upload(postageBatchId, data, fileName, uploadAsWebsite);
   }
 
   async getAllPostageBatches() {
-    return await this.bee.getAllPostageBatch();
-  }
+    const bees = this.beeHive.getBeeNodes();
 
-  async getWallet() {
-    return await this.bee.getWalletBalance();
-  }
-
-  async getWalletBzzBalance() {
-    if (await this.isDev()) {
-      return 99999999;
+    const batches: PostageBatch[] = [];
+    for (const bee of bees) {
+      const batches = await bee.getAllPostageBatches();
+      batches.push(...batches);
     }
-    const wallet = await this.getWallet();
-    return new BZZ(wallet.bzzBalance).toBZZ(2);
+
+    return batches;
   }
 
-  async getPostageBatch(postageBatchId: string) {
-    return await this.bee.getPostageBatch(postageBatchId);
-  }
+  async getWalletBzzBalances() {
+    const result: { balance: number; beeNode: BeeNode }[] = [];
+    const bees = this.beeHive.getBeeNodes();
 
-  async createPostageBatch(amount: string, depth: number): Promise<BatchId> {
-    return await this.bee.createPostageBatch(amount, depth, { waitForUsable: true, waitForUsableTimeout: 480_000 });
-  }
-
-  async dilute(postageBatchId: string, depth: number) {
-    this.logger.info(`Performing dilute on ${postageBatchId} with depth: ${depth}`);
-    if (await this.isDev()) {
-      this.logger.info(`Skipping dilute because bee is running in dev mode`);
-    } else {
-      return await this.bee.diluteBatch(postageBatchId, depth);
+    for (const beeNode of bees) {
+      const balance = await beeNode.getWalletBzzBalance();
+      result.push({ balance, beeNode });
     }
+
+    return result;
   }
 
-  async topUp(postageBatchId: string, amount: string) {
-    if (await this.isDev()) {
-      this.logger.info(`Skipping topUp because bee is running in dev mode`);
-    } else {
-      return await this.bee.topUpBatch(postageBatchId, amount);
-    }
+  async getPostageBatch(beeId: BeesRowId, postageBatchId: string) {
+    const bee = await this.beeHive.getBeeById(beeId);
+    return await bee.getPostageBatch(postageBatchId);
+  }
+
+  async createPostageBatch(amount: string, depth: number): Promise<{ postageBatchId: BatchId; beeId: BeesRowId }> {
+    const bee = await this.beeHive.getBeeForPostageBatchCreation();
+    const postageBatchId = await bee.createPostageBatch(amount, depth);
+    return { postageBatchId, beeId: bee.beeRow.id };
+  }
+
+  async dilute(beeId: BeesRowId, postageBatchId: string, depth: number) {
+    const bee = await this.beeHive.getBeeById(beeId);
+    return await bee.dilute(postageBatchId, depth);
+  }
+
+  async topUp(beeId: BeesRowId, postageBatchId: string, amount: string) {
+    const bee = await this.beeHive.getBeeById(beeId);
+    return await bee.topUp(postageBatchId, amount);
   }
 
   async getAmountPerDay() {
-    const chainState = await this.bee.getChainState();
-    const pricePer5Seconds = Number(chainState.currentPrice);
-    return pricePer5Seconds * 12 * 60 * 24;
+    const bee = this.beeHive.getFirstBee();
+    if (await bee.isDev()) {
+      return AMOUNT_FOR_ONE_DAY;
+    }
+    return await bee.getAmountPerDay();
   }
 
   async getTopology() {
-    return this.bee.getTopology();
-  }
-
-  async isDev() {
-    const info = await this.bee.getNodeInfo();
-    return info.beeMode === BeeModes.DEV;
+    const bee = this.beeHive.getFirstBee();
+    return bee.getTopology();
   }
 
   async updateFeed(
+    organizationId: OrganizationsRowId,
     postageBatchId: string,
     privateKey: Uint8Array,
     fileReference: string,
   ): Promise<{ reference: string; manifest: string }> {
+    const organization = await getOnlyOrganizationsRowOrThrow({ id: organizationId });
     const address = Elliptic.publicKeyToAddress(
       Elliptic.privateKeyToPublicKey(Binary.uint256ToNumber(privateKey, 'BE')),
     );
-    const writer = this.bee.makeFeedWriter('sequence', NULL_TOPIC, privateKey);
-    const { reference: manifest } = await this.bee.createFeedManifest(postageBatchId, 'sequence', NULL_TOPIC, address);
+    const { bee } = await this.beeHive.getBeeById(organization.beeId);
+    const writer = bee.makeFeedWriter('sequence', NULL_TOPIC, privateKey);
+    const { reference: manifest } = await bee.createFeedManifest(postageBatchId, 'sequence', NULL_TOPIC, address);
     const { reference } = await writer.upload(postageBatchId, fileReference as Reference);
 
     return { reference, manifest };
