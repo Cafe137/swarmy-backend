@@ -28,7 +28,7 @@
     "@nestjs/schedule": "^4.1.0",
     "axios": "^0.29.0",
     "bcrypt": "^5.1.1",
-    "cafe-utility": "^26.5.0",
+    "cafe-utility": "^27.1.0",
     "cookie-parser": "^1.4.6",
     "form-data": "^4.0.1",
     "image-thumbnail": "^1.0.15",

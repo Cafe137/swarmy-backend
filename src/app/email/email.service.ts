@@ -58,6 +58,20 @@ export class EmailService {
     );
   }
 
+  public async sendCryptoPaymentReminder(to: string, paymentUrl: string) {
+    return this.sendEmail(
+      to,
+      'Payment reminder',
+      `Your payment is due soon. Please pay by clicking on the link below: ${paymentUrl}`,
+      makeEmailTemplate(
+        'Payment reminder',
+        'Your payment is due soon. Please click on the button below to pay.',
+        'Pay Now',
+        paymentUrl,
+      ),
+    );
+  }
+
   private async sendEmail(to: string, subject: string, text: string, html?: string) {
     await this.client.messages
       .create(this.mailgunDomain, {

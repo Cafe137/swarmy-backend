@@ -1,7 +1,7 @@
-import { BatchId, Bee, BeeModes, Data, FileData } from '@ethersphere/bee-js';
+import { BatchId, Bee, BeeModes, Data, FileData, NULL_TOPIC, Reference } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Types } from 'cafe-utility';
+import { Binary, Elliptic, Types } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { Readable } from 'stream';
 import { BZZ } from '../token/bzz';
@@ -89,5 +89,20 @@ export class BeeService {
   async isDev() {
     const info = await this.bee.getNodeInfo();
     return info.beeMode === BeeModes.DEV;
+  }
+
+  async updateFeed(
+    postageBatchId: string,
+    privateKey: Uint8Array,
+    fileReference: string,
+  ): Promise<{ reference: string; manifest: string }> {
+    const address = Elliptic.publicKeyToAddress(
+      Elliptic.privateKeyToPublicKey(Binary.uint256ToNumber(privateKey, 'BE')),
+    );
+    const writer = this.bee.makeFeedWriter('sequence', NULL_TOPIC, privateKey);
+    const { reference: manifest } = await this.bee.createFeedManifest(postageBatchId, 'sequence', NULL_TOPIC, address);
+    const { reference } = await writer.upload(postageBatchId, fileReference as Reference);
+
+    return { reference, manifest };
   }
 }
