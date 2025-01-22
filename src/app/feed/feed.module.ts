@@ -9,4 +9,4 @@ import { FeedService } from './feed.service';
   providers: [FeedService],
   exports: [],
 })
-export class CryptoPaymentModule {}
+export class FeedModule {}

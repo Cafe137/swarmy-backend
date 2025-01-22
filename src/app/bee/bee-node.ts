@@ -8,7 +8,7 @@ export class BeeNode {
   constructor(beeRow: BeesRow, logger: PinoLogger) {
     this.beeRow = beeRow;
     this.logger = logger;
-    this.bee = new Bee(beeRow.url);
+    this.bee = new Bee(beeRow.url, beeRow.secret ? { headers: { authorization: beeRow.secret } } : {});
   }
 
   beeRow: BeesRow;

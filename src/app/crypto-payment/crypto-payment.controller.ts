@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { OrganizationsRow, PlansRowId } from 'src/DatabaseExtra';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { CryptoPaymentService } from './crypto-payment.service';
@@ -12,8 +12,8 @@ export class CryptoPaymentController {
     return this.cryptoPaymentService.getPaymentsForOrganization(organization.id);
   }
 
-  @Post('/crypto-payments/:plan')
-  initiatieCryptoPayment(@OrganizationInContext() organization: OrganizationsRow, planId: number) {
+  @Post('/crypto-payments/:planId')
+  initiatieCryptoPayment(@OrganizationInContext() organization: OrganizationsRow, @Param('planId') planId: number) {
     return this.cryptoPaymentService.initiatePaymentForPlan(organization.id, planId as PlansRowId);
   }
 }

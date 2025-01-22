@@ -44,6 +44,7 @@ export class FeedService {
     const organization = await getOnlyOrganizationsRowOrThrow({ id: user.organizationId });
     const privateKey = Strings.randomHex(64);
     await insertFeedsRow({ userId, organizationId: organization.id, name, privateKey });
+    return this.getAll(userId);
   }
 
   async update(userId: UsersRowId, feedId: FeedsRowId, fileReferenceId: FileReferencesRowId) {
@@ -56,8 +57,11 @@ export class FeedService {
       id: fileReferenceId,
       organizationId: organization.id,
     });
+    if (!fileReference.hash) {
+      throw Error('File reference does not have a hash yet');
+    }
     const feedUpdateResult = await this.beeService.updateFeed(
-      organization.postageBatchId,
+      organization.id,
       Binary.hexToUint8Array(feed.privateKey),
       fileReference.hash,
     );
@@ -68,5 +72,6 @@ export class FeedService {
       feedAddress: feedUpdateResult.reference,
       lastBzzAddress: fileReference.hash,
     });
+    return this.getAll(userId);
   }
 }

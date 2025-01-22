@@ -32,6 +32,7 @@ export interface BeesRow {
   id: BeesRowId;
   name: string;
   url: string;
+  secret?: string | null;
   enabled: 0 | 1;
   uploadEnabled: 0 | 1;
   downloadEnabled: 0 | 1;
@@ -55,7 +56,7 @@ export interface CryptoPaymentsRow {
   planId: PlansRowId;
   amount: number;
   currency: string;
-  status: 'PENDING' | 'SUCCESS' | 'FAILURE';
+  status: 'PENDING' | 'SUCCESS' | 'FAILURE' | 'OBSOLETE';
   statusReasonCode?: string | null;
   createdAt: Date;
 }
@@ -85,14 +86,16 @@ export interface FeedsRow {
 export type FileReferencesRowId = number & { __brand: 'FileReferencesRowId' };
 export interface FileReferencesRow {
   id: FileReferencesRowId;
+  archiveId?: string | null;
   organizationId: OrganizationsRowId;
   thumbnailBase64?: string | null;
   name: string;
   contentType: string;
-  hash: string;
+  hash?: string | null;
   size: number;
   hits: number;
   isWebsite: 0 | 1;
+  uploaded: 0 | 1;
   createdAt: Date;
 }
 
@@ -103,7 +106,7 @@ export interface OrganizationsRow {
   stripeIdentifier: string;
   postageBatchId?: string | null;
   enabled: 0 | 1;
-  beeId: BeesRowId;
+  beeId?: BeesRowId | null;
   createdAt: Date;
 }
 
@@ -221,6 +224,7 @@ export interface NewApiKeysRow {
 export interface NewBeesRow {
   name: string;
   url: string;
+  secret?: string | null;
   enabled?: 0 | 1 | null;
   uploadEnabled?: 0 | 1 | null;
   downloadEnabled?: 0 | 1 | null;
@@ -240,7 +244,7 @@ export interface NewCryptoPaymentsRow {
   planId: PlansRowId;
   amount: number;
   currency: string;
-  status: 'PENDING' | 'SUCCESS' | 'FAILURE';
+  status: 'PENDING' | 'SUCCESS' | 'FAILURE' | 'OBSOLETE';
   statusReasonCode?: string | null;
   createdAt?: Date | null;
 }
@@ -264,14 +268,16 @@ export interface NewFeedsRow {
 }
 
 export interface NewFileReferencesRow {
+  archiveId?: string | null;
   organizationId: OrganizationsRowId;
   thumbnailBase64?: string | null;
   name: string;
   contentType: string;
-  hash: string;
+  hash?: string | null;
   size: number;
   hits?: number | null;
   isWebsite: 0 | 1;
+  uploaded?: 0 | 1 | null;
   createdAt?: Date | null;
 }
 
@@ -280,7 +286,7 @@ export interface NewOrganizationsRow {
   stripeIdentifier: string;
   postageBatchId?: string | null;
   enabled?: 0 | 1 | null;
-  beeId: BeesRowId;
+  beeId?: BeesRowId | null;
   createdAt?: Date | null;
 }
 

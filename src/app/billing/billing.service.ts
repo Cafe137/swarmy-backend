@@ -122,7 +122,6 @@ export class BillingService {
   }
 
   private async handleInvoicePaid(object: Stripe.Invoice) {
-    console.log(object);
     const merchantTransactionId = object?.subscription_details?.metadata?.client_reference_id;
     if (!merchantTransactionId) {
       const message = 'No merchantTransactionId found in invoicePaid event.';

@@ -90,6 +90,7 @@ export class StripeService {
     });
 
     return {
+      planId,
       redirectUrl: session.url,
     };
   }

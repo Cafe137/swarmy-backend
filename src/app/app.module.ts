@@ -5,17 +5,19 @@ import { LoggerModule } from 'nestjs-pino';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
+import { CryptoPaymentModule } from './crypto-payment/crypto-payment.module';
 import { DataModule } from './data/data.module';
 import { EmailModule } from './email/email.module';
+import { FeedModule } from './feed/feed.module';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
 import { MonitorModule } from './monitor/monitor.module';
 import { PaymentModule } from './payment/payment.module';
 import { PlanModule } from './plan/plan.module';
 import { PostageBatchQueueModule } from './postage-batch-queue/postage-batch-queue.module';
 import { StaticTextModule } from './static-text/static-text.module';
+import { UploadQueueModule } from './upload-queue/upload-queue.module';
 import { UsageMetricsModule } from './usage-metrics/usage-metrics.module';
 import { UserModule } from './user/user.module';
-import { UploadQueueModule } from './upload-queue/upload-queue.module';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { UploadQueueModule } from './upload-queue/upload-queue.module';
     DataModule,
     PlanModule,
     PaymentModule,
+    CryptoPaymentModule,
     BillingModule,
     HealthcheckModule,
     StaticTextModule,
@@ -34,6 +37,7 @@ import { UploadQueueModule } from './upload-queue/upload-queue.module';
     UsageMetricsModule,
     PostageBatchQueueModule,
     UploadQueueModule,
+    FeedModule,
 
     LoggerModule.forRootAsync({
       imports: [ConfigModule],

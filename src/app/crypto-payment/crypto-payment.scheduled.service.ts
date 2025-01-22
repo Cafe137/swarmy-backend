@@ -8,6 +8,7 @@ import {
   getOnlyOrganizationsRowOrThrow,
   getPlansRows,
   getUsersRows,
+  updateCryptoPaymentsRow,
 } from 'src/DatabaseExtra';
 import { EmailService } from '../email/email.service';
 import { CryptoPaymentService } from './crypto-payment.service';
@@ -26,6 +27,16 @@ export class CryptoPaymentScheduledService {
     const pendingCryptoPayments = await getCryptoPaymentsRows({ status: 'PENDING' });
     for (const payment of pendingCryptoPayments) {
       await this.cryptoPaymentService.checkPayment(payment);
+    }
+  }
+
+  @Interval(Dates.hours(1))
+  async cleanUpOldPendingPayments() {
+    const cryptoPayments = await getCryptoPaymentsRows({ status: 'PENDING' });
+    for (const payment of cryptoPayments) {
+      if (payment.createdAt.getTime() < Date.now() - Dates.days(1)) {
+        await updateCryptoPaymentsRow(payment.id, { status: 'OBSOLETE' });
+      }
     }
   }
 

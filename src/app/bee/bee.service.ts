@@ -82,18 +82,25 @@ export class BeeService {
 
   async updateFeed(
     organizationId: OrganizationsRowId,
-    postageBatchId: string,
     privateKey: Uint8Array,
     fileReference: string,
   ): Promise<{ reference: string; manifest: string }> {
     const organization = await getOnlyOrganizationsRowOrThrow({ id: organizationId });
+    if (!organization.beeId || !organization.postageBatchId) {
+      throw Error('Organization does not have a beeId or postageBatchId');
+    }
     const address = Elliptic.publicKeyToAddress(
       Elliptic.privateKeyToPublicKey(Binary.uint256ToNumber(privateKey, 'BE')),
     );
     const { bee } = await this.beeHive.getBeeById(organization.beeId);
     const writer = bee.makeFeedWriter('sequence', NULL_TOPIC, privateKey);
-    const { reference: manifest } = await bee.createFeedManifest(postageBatchId, 'sequence', NULL_TOPIC, address);
-    const { reference } = await writer.upload(postageBatchId, fileReference as Reference);
+    const { reference: manifest } = await bee.createFeedManifest(
+      organization.postageBatchId,
+      'sequence',
+      NULL_TOPIC,
+      address,
+    );
+    const { reference } = await writer.upload(organization.postageBatchId, fileReference as Reference);
 
     return { reference, manifest };
   }
