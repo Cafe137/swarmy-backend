@@ -22,7 +22,7 @@ export class FeedService {
   constructor(private readonly beeService: BeeService) {}
 
   async getAll(userId: UsersRowId): Promise<Omit<FeedsRow, 'privateKey'>[]> {
-    const feeds = await getFeedsRows({ userId });
+    const feeds = await getFeedsRows({ userId }, { order: { column: 'createdAt', direction: 'DESC' } });
     return feeds.map((feed) => {
       return {
         id: feed.id,
