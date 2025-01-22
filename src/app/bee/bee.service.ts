@@ -27,8 +27,8 @@ export class BeeService {
 
     const batches: PostageBatch[] = [];
     for (const bee of bees) {
-      const batches = await bee.getAllPostageBatches();
-      batches.push(...batches);
+      const nodeBatches = await bee.getAllPostageBatches();
+      batches.push(...nodeBatches);
     }
 
     return batches;
