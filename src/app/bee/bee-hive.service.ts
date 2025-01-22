@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { Interval } from '@nestjs/schedule';
+import { Dates } from 'cafe-utility';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { getBeesRows } from '../../DatabaseExtra';
 import { BeeNode } from './bee-node';
-import { Dates } from 'cafe-utility';
 
 @Injectable()
 export class BeeHiveService {

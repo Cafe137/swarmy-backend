@@ -1,8 +1,9 @@
-import { BatchId, Data, FileData, PostageBatch } from '@ethersphere/bee-js';
+import { BatchId, Data, FileData, NULL_TOPIC, PostageBatch, Reference } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
+import { Binary, Elliptic } from 'cafe-utility';
 import { Readable } from 'stream';
+import { BeesRowId, getOnlyOrganizationsRowOrThrow, OrganizationsRowId } from '../../DatabaseExtra';
 import { BeeHiveService } from './bee-hive.service';
-import { BeesRowId } from '../../DatabaseExtra';
 import { BeeNode } from './bee-node';
 
 const AMOUNT_FOR_ONE_DAY = 414720000;
@@ -77,5 +78,30 @@ export class BeeService {
   async getTopology() {
     const bee = this.beeHive.getFirstBee();
     return bee.getTopology();
+  }
+
+  async updateFeed(
+    organizationId: OrganizationsRowId,
+    privateKey: Uint8Array,
+    fileReference: string,
+  ): Promise<{ reference: string; manifest: string }> {
+    const organization = await getOnlyOrganizationsRowOrThrow({ id: organizationId });
+    if (!organization.beeId || !organization.postageBatchId) {
+      throw Error('Organization does not have a beeId or postageBatchId');
+    }
+    const address = Elliptic.publicKeyToAddress(
+      Elliptic.privateKeyToPublicKey(Binary.uint256ToNumber(privateKey, 'BE')),
+    );
+    const { bee } = await this.beeHive.getBeeById(organization.beeId);
+    const writer = bee.makeFeedWriter('sequence', NULL_TOPIC, privateKey);
+    const { reference: manifest } = await bee.createFeedManifest(
+      organization.postageBatchId,
+      'sequence',
+      NULL_TOPIC,
+      address,
+    );
+    const { reference } = await writer.upload(organization.postageBatchId, fileReference as Reference);
+
+    return { reference, manifest };
   }
 }

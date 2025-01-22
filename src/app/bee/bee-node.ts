@@ -1,14 +1,14 @@
-import { BeesRow } from '../../DatabaseExtra';
 import { BatchId, Bee, BeeModes, Data, FileData } from '@ethersphere/bee-js';
-import { Readable } from 'stream';
-import { BZZ } from '../token/bzz';
 import { PinoLogger } from 'nestjs-pino';
+import { Readable } from 'stream';
+import { BeesRow } from '../../DatabaseExtra';
+import { BZZ } from '../token/bzz';
 
 export class BeeNode {
   constructor(beeRow: BeesRow, logger: PinoLogger) {
     this.beeRow = beeRow;
     this.logger = logger;
-    this.bee = new Bee(beeRow.url);
+    this.bee = new Bee(beeRow.url, beeRow.secret ? { headers: { authorization: beeRow.secret } } : {});
   }
 
   beeRow: BeesRow;

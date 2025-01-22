@@ -24,12 +24,10 @@ export class PlanController {
         organizationId: user.organizationId,
         amount: 0,
         currency: subscriptionConfig.currency,
-        quotas: {
-          uploadSizeLimit: 0,
-          downloadSizeLimit: 0,
-          downloadCountLimit: 0,
-          uploadCountLimit: 0,
-        },
+        uploadSizeLimit: 0,
+        downloadSizeLimit: 0,
+        downloadCountLimit: 0,
+        uploadCountLimit: 0,
       }
     );
   }
