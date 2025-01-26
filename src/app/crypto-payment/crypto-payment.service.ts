@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { Dates, FixedPointNumber, Types } from 'cafe-utility';
+import { FixedPointNumber, Types } from 'cafe-utility';
 import {
   CryptoPaymentsRow,
   getCryptoPaymentsRows,
@@ -11,14 +11,17 @@ import {
   OrganizationsRowId,
   PlansRowId,
   updateCryptoPaymentsRow,
-  updatePlansRow,
 } from 'src/DatabaseExtra';
+import { PlanService } from '../plan/plan.service';
 
 @Injectable()
 export class CryptoPaymentService {
   private readonly coinbaseApiKey: string;
 
-  constructor(configService: ConfigService) {
+  constructor(
+    configService: ConfigService,
+    private planService: PlanService,
+  ) {
     this.coinbaseApiKey = Types.asString(configService.get<string>('COINBASE_API_KEY'), { name: 'COINBASE_API_KEY' });
   }
 
@@ -40,8 +43,7 @@ export class CryptoPaymentService {
       time: string;
     }[];
     if (timeline.some((x) => x.status === 'COMPLETED')) {
-      const paidUntil = new Date(Date.now() + Dates.days(31));
-      await updatePlansRow(payment.planId, { status: 'ACTIVE', paidUntil });
+      await this.planService.activatePlan(payment.organizationId, payment.planId);
       await updateCryptoPaymentsRow(payment.id, { status: 'SUCCESS' });
     }
   }

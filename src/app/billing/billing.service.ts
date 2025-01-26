@@ -113,12 +113,12 @@ export class BillingService {
     if (!payment) {
       throw new BadRequestException(`No payment found with id ${merchantTransactionId}`);
     }
-    await updatePaymentsRow(payment.id, { status: 'SUCCESS' });
 
     const organization = await this.organizationService.getOrganization(payment.organizationId);
     const planToActivate = await this.planService.getPlanById(organization.id, payment.planId);
 
     await this.planService.activatePlan(organization.id, planToActivate.id);
+    await updatePaymentsRow(payment.id, { status: 'SUCCESS' });
   }
 
   private async handleInvoicePaid(object: Stripe.Invoice) {
