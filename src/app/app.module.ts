@@ -10,7 +10,6 @@ import { DataModule } from './data/data.module';
 import { EmailModule } from './email/email.module';
 import { FeedModule } from './feed/feed.module';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
-import { MonitorModule } from './monitor/monitor.module';
 import { PaymentModule } from './payment/payment.module';
 import { PlanModule } from './plan/plan.module';
 import { PostageBatchQueueModule } from './postage-batch-queue/postage-batch-queue.module';
@@ -33,7 +32,6 @@ import { UserModule } from './user/user.module';
     HealthcheckModule,
     StaticTextModule,
     EmailModule,
-    MonitorModule,
     UsageMetricsModule,
     PostageBatchQueueModule,
     UploadQueueModule,

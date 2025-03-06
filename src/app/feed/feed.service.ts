@@ -68,8 +68,8 @@ export class FeedService {
     await runQuery('DELETE FROM swarmy.feedItems WHERE feedId = ?', feedId);
     await insertFeedItemsRow({ feedId, fileReferenceId });
     await updateFeedsRow(feed.id, {
-      manifestAddress: feedUpdateResult.manifest,
-      feedAddress: feedUpdateResult.reference,
+      manifestAddress: feedUpdateResult.manifest.toHex(),
+      feedAddress: feedUpdateResult.reference.toHex(),
       lastBzzAddress: fileReference.hash,
     });
     return this.getAll(userId);

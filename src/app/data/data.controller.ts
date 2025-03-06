@@ -16,7 +16,6 @@ import {
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
-import { Buffer } from 'safe-buffer';
 import { OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
 import { ApiKeyGuard } from '../api-key/api-key.guard';
 import { Public } from '../auth/public.decorator';
@@ -98,7 +97,7 @@ export class DataController {
       response.header(key, result.headers[key]);
     }
     // todo maybe add cookie only for sites
-    return response.status(200).cookie('k', request['key']).send(Buffer.from(result.data.buffer));
+    return response.status(200).cookie('k', request['key']).send(result.data.toUint8Array());
   }
 
   @Public()
@@ -116,7 +115,7 @@ export class DataController {
       for (const key in result.headers) {
         response.header(key, result.headers[key]);
       }
-      return response.status(200).send(Buffer.from(result.data.buffer));
+      return response.status(200).send(result.data.toUint8Array());
     } catch (error) {
       return response.status(404).json({ message: 'not found' });
     }

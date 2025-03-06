@@ -1,5 +1,5 @@
-import { Topology } from '@ethersphere/bee-js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BZZ, Topology } from '@upcoming/bee-js';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
@@ -38,13 +38,12 @@ export class HealthcheckService {
     const balances = await this.beeService.getWalletBzzBalances();
 
     for (const balanceResult of balances) {
-      if (balanceResult.balance < 20) {
+      if (balanceResult.balance.lt(BZZ.fromDecimalString('20.0'))) {
         const message = `Low balance: ${balanceResult.balance} on ${balanceResult.beeNode.beeRow.name}`;
         this.logger.error(message);
         this.alertService.sendAlert(message);
         throw new InternalServerErrorException(message);
       }
     }
-
   }
 }

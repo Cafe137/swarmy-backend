@@ -105,6 +105,7 @@ export interface OrganizationsRow {
   name: string;
   stripeIdentifier: string;
   postageBatchId?: string | null;
+  enableBackup: 0 | 1;
   enabled: 0 | 1;
   beeId?: BeesRowId | null;
   createdAt: Date;
@@ -285,6 +286,7 @@ export interface NewOrganizationsRow {
   name: string;
   stripeIdentifier: string;
   postageBatchId?: string | null;
+  enableBackup?: 0 | 1 | null;
   enabled?: 0 | 1 | null;
   beeId?: BeesRowId | null;
   createdAt?: Date | null;

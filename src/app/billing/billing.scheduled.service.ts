@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
+import { Duration, Utils } from '@upcoming/bee-js';
 import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
@@ -46,16 +47,17 @@ export class BillingScheduledService {
         this.alertService.sendAlert(message);
         continue;
       }
-      const { batchTTL } = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
-      if (batchTTL * 1000 < Dates.days(3)) {
+      const { duration } = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
+      if (duration.toDays() < 3) {
         const existingJobs = await getPostageTopUpQueueRows({ postageBatchId: organization.postageBatchId });
         if (existingJobs.length > 0) {
           continue;
         }
+        const blockPrice = await this.beeService.getDataPricePerBlock();
         await insertPostageTopUpQueueRow({
           organizationId: organization.id,
           postageBatchId: organization.postageBatchId,
-          amount: (await this.beeService.getAmountPerDay()) * 3,
+          amount: Number(Utils.getAmountForDuration(Duration.fromDays(3), blockPrice)),
         });
       }
     }

@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Duration, Size, Utils } from '@upcoming/bee-js';
 import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
@@ -17,7 +18,6 @@ import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { StripeService } from '../stripe/stripe.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
-import { getDepthForRequestedStorage } from './subscriptions';
 
 const DAYS_TO_PURCHASE_POSTAGE_BATCH = 30;
 
@@ -93,11 +93,12 @@ export class PlanService {
 
   private async queueCreation(organization: OrganizationsRow, plan: PlansRow) {
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
-    const amount = (await this.beeService.getAmountPerDay()) * DAYS_TO_PURCHASE_POSTAGE_BATCH;
-    const depth = getDepthForRequestedStorage(requestedGbs);
+    const blockPrice = await this.beeService.getDataPricePerBlock();
+    const amount = Utils.getAmountForDuration(Duration.fromDays(DAYS_TO_PURCHASE_POSTAGE_BATCH), blockPrice);
+    const depth = Utils.getDepthForSize(Size.fromGigabytes(requestedGbs));
     await insertPostageCreationQueueRow({
       organizationId: organization.id,
-      amount,
+      amount: Number(amount),
       depth,
     });
   }
@@ -110,7 +111,7 @@ export class PlanService {
       throw new InternalServerErrorException(message);
     }
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
-    const depth = getDepthForRequestedStorage(requestedGbs);
+    const depth = Utils.getDepthForSize(Size.fromGigabytes(requestedGbs));
     const postageBatch = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
     if (depth > postageBatch.depth) {
       await insertPostageDiluteQueueRow({

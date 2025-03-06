@@ -1,5 +1,5 @@
-import { BatchId, Data, FileData, NULL_TOPIC, PostageBatch, Reference } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
+import { BatchId, Bytes, BZZ, FileData, NULL_TOPIC, PostageBatch, Reference } from '@upcoming/bee-js';
 import { Binary, Elliptic } from 'cafe-utility';
 import { Readable } from 'stream';
 import { BeesRowId, getOnlyOrganizationsRowOrThrow, OrganizationsRowId } from '../../DatabaseExtra';
@@ -12,14 +12,22 @@ const AMOUNT_FOR_ONE_DAY = 414720000;
 export class BeeService {
   constructor(private readonly beeHive: BeeHiveService) {}
 
-  async download(hash: string, path?: string): Promise<FileData<Data>> {
+  async download(hash: string, path?: string): Promise<FileData<Bytes>> {
     const bee = this.beeHive.getBeeForDownload();
     return bee.download(hash, path);
   }
 
   async upload(beeId: BeesRowId, postageBatchId: string, data: Readable, fileName: string, uploadAsWebsite?: boolean) {
     const bee = await this.beeHive.getBeeById(beeId);
-    return await bee.upload(postageBatchId, data, fileName, uploadAsWebsite);
+    return bee.upload(postageBatchId, data, fileName, uploadAsWebsite);
+  }
+
+  async getDataPricePerBlock() {
+    const bees = this.beeHive.getBeeNodes();
+    if (!bees.length) {
+      throw Error('No bees available');
+    }
+    return bees[0].getDataPricePerBlock();
   }
 
   async getAllPostageBatches() {
@@ -35,7 +43,7 @@ export class BeeService {
   }
 
   async getWalletBzzBalances() {
-    const result: { balance: number; beeNode: BeeNode }[] = [];
+    const result: { balance: BZZ; beeNode: BeeNode }[] = [];
     const bees = this.beeHive.getBeeNodes();
 
     for (const beeNode of bees) {
@@ -48,7 +56,7 @@ export class BeeService {
 
   async getPostageBatch(beeId: BeesRowId, postageBatchId: string) {
     const bee = await this.beeHive.getBeeById(beeId);
-    return await bee.getPostageBatch(postageBatchId);
+    return bee.getPostageBatch(postageBatchId);
   }
 
   async createPostageBatch(amount: string, depth: number): Promise<{ postageBatchId: BatchId; beeId: BeesRowId }> {
@@ -59,20 +67,12 @@ export class BeeService {
 
   async dilute(beeId: BeesRowId, postageBatchId: string, depth: number) {
     const bee = await this.beeHive.getBeeById(beeId);
-    return await bee.dilute(postageBatchId, depth);
+    return bee.dilute(postageBatchId, depth);
   }
 
   async topUp(beeId: BeesRowId, postageBatchId: string, amount: string) {
     const bee = await this.beeHive.getBeeById(beeId);
-    return await bee.topUp(postageBatchId, amount);
-  }
-
-  async getAmountPerDay() {
-    const bee = this.beeHive.getFirstBee();
-    if (await bee.isDev()) {
-      return AMOUNT_FOR_ONE_DAY;
-    }
-    return await bee.getAmountPerDay();
+    return bee.topUp(postageBatchId, amount);
   }
 
   async getTopology() {
@@ -84,7 +84,7 @@ export class BeeService {
     organizationId: OrganizationsRowId,
     privateKey: Uint8Array,
     fileReference: string,
-  ): Promise<{ reference: string; manifest: string }> {
+  ): Promise<{ reference: Reference; manifest: Reference }> {
     const organization = await getOnlyOrganizationsRowOrThrow({ id: organizationId });
     if (!organization.beeId || !organization.postageBatchId) {
       throw Error('Organization does not have a beeId or postageBatchId');
@@ -93,14 +93,9 @@ export class BeeService {
       Elliptic.privateKeyToPublicKey(Binary.uint256ToNumber(privateKey, 'BE')),
     );
     const { bee } = await this.beeHive.getBeeById(organization.beeId);
-    const writer = bee.makeFeedWriter('sequence', NULL_TOPIC, privateKey);
-    const { reference: manifest } = await bee.createFeedManifest(
-      organization.postageBatchId,
-      'sequence',
-      NULL_TOPIC,
-      address,
-    );
-    const { reference } = await writer.upload(organization.postageBatchId, fileReference as Reference);
+    const writer = bee.makeFeedWriter(NULL_TOPIC, privateKey);
+    const manifest = await bee.createFeedManifest(organization.postageBatchId, NULL_TOPIC, address);
+    const { reference } = await writer.uploadPayload(organization.postageBatchId, fileReference);
 
     return { reference, manifest };
   }

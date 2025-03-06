@@ -45,7 +45,7 @@ export class PostageBatchQueueScheduledService {
           createJob.amount.toString(),
           createJob.depth,
         );
-        await updateOrganizationsRow(createJob.organizationId, { postageBatchId, beeId });
+        await updateOrganizationsRow(createJob.organizationId, { postageBatchId: postageBatchId.toHex(), beeId });
         await runQuery('DELETE FROM postageCreationQueue WHERE id = ?', createJob.id);
       } catch (error) {
         const message = `Create job: Failed to create postage batch for organization ${createJob.organizationId}`;

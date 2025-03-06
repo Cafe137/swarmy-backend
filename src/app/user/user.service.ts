@@ -60,7 +60,7 @@ export class UserService {
 
   async hash(password: string): Promise<string> {
     const saltOrRounds = 10;
-    return await bcrypt.hash(password, saltOrRounds);
+    return bcrypt.hash(password, saltOrRounds);
   }
 
   async resendEmailVerification(user?: UsersRow | null, code?: string | null) {

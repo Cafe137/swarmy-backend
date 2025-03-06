@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { AlertService } from '../alert/alert.service';
-import { BeeService } from '../bee/bee.service';
 import { Interval } from '@nestjs/schedule';
 import { Dates } from 'cafe-utility';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import * as fs from 'node:fs';
+import { runQuery } from '../../Database';
 import {
   getOnlyFileReferencesRowOrThrow,
   getOnlyOrganizationsRowOrThrow,
@@ -13,9 +13,9 @@ import {
   UploadToBeeQueueRow,
   UploadToBeeQueueRowId,
 } from '../../DatabaseExtra';
+import { AlertService } from '../alert/alert.service';
 import { BeeHiveService } from '../bee/bee-hive.service';
-import { runQuery } from '../../Database';
-import * as fs from 'node:fs';
+import { BeeService } from '../bee/bee.service';
 import { ThumbnailService } from './thumbnail.service';
 
 @Injectable()
@@ -78,7 +78,7 @@ export class UploadToBeeQueueScheduledService {
         file.isWebsite === 1,
       );
       await updateFileReferencesRow(file.id, {
-        hash: uploadResult.reference,
+        hash: uploadResult.reference.toHex(),
         uploaded: 1,
         thumbnailBase64: thumbnail,
       });
