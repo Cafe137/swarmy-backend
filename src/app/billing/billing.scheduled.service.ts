@@ -7,13 +7,13 @@ import {
   getPlansRows,
   getPostageTopUpQueueRows,
   insertPostageTopUpQueueRow,
-  PlansRow,
   updateOrganizationsRow,
   updatePlansRow,
 } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { OrganizationService } from '../organization/organization.service';
+import { PlanService } from '../plan/plan.service';
 
 @Injectable()
 export class BillingScheduledService {
@@ -23,31 +23,35 @@ export class BillingScheduledService {
     private alertService: AlertService,
     private beeService: BeeService,
     private organizationService: OrganizationService,
+    private planService: PlanService,
   ) {}
 
   @Interval(Dates.minutes(5))
-  async checkPlansForCancellation() {
-    const plans = await getPlansRows({ status: 'ACTIVE' });
-    for (const plan of plans) {
-      if (plan.paidUntil && plan.paidUntil.getTime() < Date.now()) {
-        this.logger.info(`Cancelling plan ${plan.id}`);
-        await this.cancelPlan(plan);
-      }
-    }
-  }
-
-  @Interval(Dates.minutes(5))
-  async checkPlansForTopUp() {
+  async maintainPlans() {
     const plans = await getPlansRows({ status: 'ACTIVE' });
     for (const plan of plans) {
       const organization = await this.organizationService.getOrganization(plan.organizationId);
+
+      // cancel
+      if (plan.paidUntil && plan.paidUntil.getTime() < Date.now()) {
+        this.logger.info(`Cancelling plan ${plan.id} for organization ${organization.id}`);
+        await updatePlansRow(plan.id, { status: 'CANCELLED' });
+        this.logger.info(`Removing postageBatchId ${organization.postageBatchId} from organization ${organization.id}`);
+        await updateOrganizationsRow(organization.id, { postageBatchId: null });
+        continue;
+      }
+
+      // create
       if (!organization.postageBatchId) {
         const message = `Organization ${organization.id} has no postageBatchId, but has an active plan ${plan.id}`;
         this.logger.error(message);
         this.alertService.sendAlert(message);
+        await this.planService.safelyQueueCreation(organization, plan);
         continue;
       }
-      const { duration } = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
+
+      // extend
+      const { duration } = await this.beeService.getPostageBatch(organization.beeId, organization.postageBatchId);
       if (duration.toDays() < 3) {
         const existingJobs = await getPostageTopUpQueueRows({ postageBatchId: organization.postageBatchId });
         if (existingJobs.length > 0) {
@@ -61,13 +65,5 @@ export class BillingScheduledService {
         });
       }
     }
-  }
-
-  async cancelPlan(plan: PlansRow) {
-    const organization = await this.organizationService.getOrganization(plan.organizationId);
-    this.logger.info(`Cancelling plan ${plan.id} for organization ${organization.id}`);
-    await updatePlansRow(plan.id, { status: 'CANCELLED' });
-    this.logger.info(`Removing postageBatchId ${organization.postageBatchId} from organization ${organization.id}`);
-    await updateOrganizationsRow(organization.id, { postageBatchId: null, beeId: null });
   }
 }

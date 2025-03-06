@@ -41,11 +41,13 @@ export class PostageBatchQueueScheduledService {
     const createJobs = await getPostageCreationQueueRows();
     for (const createJob of createJobs) {
       try {
-        const { postageBatchId, beeId } = await this.beeService.createPostageBatch(
+        const organization = await getOnlyOrganizationsRowOrThrow({ id: createJob.organizationId });
+        const { postageBatchId } = await this.beeService.createPostageBatch(
           createJob.amount.toString(),
           createJob.depth,
+          organization.beeId,
         );
-        await updateOrganizationsRow(createJob.organizationId, { postageBatchId: postageBatchId.toHex(), beeId });
+        await updateOrganizationsRow(createJob.organizationId, { postageBatchId: postageBatchId.toHex() });
         await runQuery('DELETE FROM postageCreationQueue WHERE id = ?', createJob.id);
       } catch (error) {
         const message = `Create job: Failed to create postage batch for organization ${createJob.organizationId}`;
@@ -60,7 +62,7 @@ export class PostageBatchQueueScheduledService {
     for (const topUpJob of topUpJobs) {
       try {
         const org = await getOnlyOrganizationsRowOrThrow({ id: topUpJob.organizationId });
-        await this.beeService.topUp(org.beeId!, topUpJob.postageBatchId, topUpJob.amount.toString());
+        await this.beeService.topUp(org.beeId, topUpJob.postageBatchId, topUpJob.amount.toString());
         await runQuery('DELETE FROM postageTopUpQueue WHERE id = ?', topUpJob.id);
       } catch (error) {
         const message = `Top up job: Failed to top up postage batch for organization ${topUpJob.organizationId}`;
@@ -75,7 +77,7 @@ export class PostageBatchQueueScheduledService {
     for (const diluteJob of diluteJobs) {
       try {
         const org = await getOnlyOrganizationsRowOrThrow({ id: diluteJob.organizationId });
-        await this.beeService.dilute(org.beeId!, diluteJob.postageBatchId, diluteJob.depth);
+        await this.beeService.dilute(org.beeId, diluteJob.postageBatchId, diluteJob.depth);
         await runQuery('DELETE FROM postageDiluteQueue WHERE id = ?', diluteJob.id);
       } catch (error) {
         const message = `Dilute job: Failed to dilute postage batch for organization ${diluteJob.organizationId}`;

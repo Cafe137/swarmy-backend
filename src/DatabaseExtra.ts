@@ -107,7 +107,7 @@ export interface OrganizationsRow {
   postageBatchId?: string | null;
   enableBackup: 0 | 1;
   enabled: 0 | 1;
-  beeId?: BeesRowId | null;
+  beeId: BeesRowId;
   createdAt: Date;
 }
 
@@ -288,7 +288,7 @@ export interface NewOrganizationsRow {
   postageBatchId?: string | null;
   enableBackup?: 0 | 1 | null;
   enabled?: 0 | 1 | null;
-  beeId?: BeesRowId | null;
+  beeId: BeesRowId;
   createdAt?: Date | null;
 }
 

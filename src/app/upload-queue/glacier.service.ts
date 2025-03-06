@@ -1,9 +1,8 @@
+import { GlacierClient, UploadArchiveCommand, UploadArchiveCommandInput } from '@aws-sdk/client-glacier';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Types } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { AlertService } from '../alert/alert.service';
-import { GlacierClient, UploadArchiveCommand, UploadArchiveCommandInput } from '@aws-sdk/client-glacier';
 import { Readable } from 'stream';
 
 @Injectable()

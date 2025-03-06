@@ -32,7 +32,7 @@ export class UploadToBeeQueueScheduledService {
   private runningJobIds: UploadToBeeQueueRowId[] = [];
 
   @Interval(Dates.seconds(5))
-  private async uploadFiles() {
+  async uploadFiles() {
     const uploadJobs = await getUploadToBeeQueueRows();
     for (const uploadJob of uploadJobs) {
       this.maybeStartUploadJob(uploadJob);
@@ -59,7 +59,7 @@ export class UploadToBeeQueueScheduledService {
   private async startUploadJob(uploadJob: UploadToBeeQueueRow) {
     const file = await getOnlyFileReferencesRowOrThrow({ id: uploadJob.fileReferenceId });
     const org = await getOnlyOrganizationsRowOrThrow({ id: file.organizationId });
-    const bee = await this.beeHive.getBeeById(org.beeId!);
+    const bee = await this.beeHive.getBeeById(org.beeId);
     if (bee.isUploading) {
       this.logger.debug(`bee busy with ${bee.beeRow.id}. Can't continue upload job (id: ${uploadJob.id})`);
       return;
@@ -71,7 +71,7 @@ export class UploadToBeeQueueScheduledService {
       const data = fs.createReadStream(uploadJob.pathOnDisk);
       const thumbnail = await this.thumbnailService.safeCreateThumbnail(file, data);
       const uploadResult = await this.beeService.upload(
-        org.beeId!,
+        org.beeId,
         org.postageBatchId!,
         data,
         file.name,

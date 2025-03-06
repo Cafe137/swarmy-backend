@@ -23,13 +23,8 @@ export class BeeHiveService {
   @Interval(Dates.seconds(120))
   private async refreshBees() {
     const beeRows = await getBeesRows({ enabled: 1 });
-
-    const newBees: BeeNode[] = [];
-    beeRows.forEach((row) => {
-      newBees.push(new BeeNode(row, this.logger));
-    });
+    this.beeNodes = beeRows.map((row) => new BeeNode(row, this.logger));
     this.logger.debug(`Refreshing bees completed. There are ${beeRows.length} bees in the hive.`);
-    this.beeNodes = newBees;
   }
 
   public getBeeForDownload(): BeeNode {
@@ -41,14 +36,6 @@ export class BeeHiveService {
     bee.downloads++;
 
     return bee;
-  }
-
-  async getBeeForPostageBatchCreation() {
-    const bees = this.beeNodes.filter((node) => node.beeRow.uploadEnabled);
-    if (bees.length === 0) {
-      throw new Error('No bees found for postage batch creation.');
-    }
-    return bees[0];
   }
 
   async getBeeById(beeId: number) {

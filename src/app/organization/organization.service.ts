@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
+  BeesRowId,
   getOnlyOrganizationsRowOrThrow,
   insertOrganizationsRow,
   OrganizationsRow,
@@ -23,7 +24,7 @@ export class OrganizationService {
   async create(email: string): Promise<OrganizationsRow> {
     const name = `${email}'s organization`;
     const stripeIdentifier = await this.stripeService.createStripeCustomer(email);
-    const id = await insertOrganizationsRow({ name, stripeIdentifier });
+    const id = await insertOrganizationsRow({ name, stripeIdentifier, beeId: 1 as BeesRowId });
     this.logger.info('Organization created', name);
     return this.getOrganization(id);
   }

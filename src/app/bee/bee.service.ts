@@ -59,10 +59,10 @@ export class BeeService {
     return bee.getPostageBatch(postageBatchId);
   }
 
-  async createPostageBatch(amount: string, depth: number): Promise<{ postageBatchId: BatchId; beeId: BeesRowId }> {
-    const bee = await this.beeHive.getBeeForPostageBatchCreation();
+  async createPostageBatch(amount: string, depth: number, beeId: BeesRowId): Promise<{ postageBatchId: BatchId }> {
+    const bee = await this.beeHive.getBeeById(beeId);
     const postageBatchId = await bee.createPostageBatch(amount, depth);
-    return { postageBatchId, beeId: bee.beeRow.id };
+    return { postageBatchId };
   }
 
   async dilute(beeId: BeesRowId, postageBatchId: string, depth: number) {

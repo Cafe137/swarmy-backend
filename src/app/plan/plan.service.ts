@@ -6,6 +6,7 @@ import {
   getOnlyOrganizationsRowOrThrow,
   getOnlyPlansRowOrNull,
   getOnlyPlansRowOrThrow,
+  getPostageCreationQueueRows,
   insertPostageCreationQueueRow,
   insertPostageDiluteQueueRow,
   OrganizationsRow,
@@ -63,7 +64,7 @@ export class PlanService {
       this.queueDilute(organization, plan);
     } else {
       await this.usageMetricsService.resetForOrganization(organizationId);
-      this.queueCreation(organization, plan);
+      this.safelyQueueCreation(organization, plan);
     }
   }
 
@@ -91,7 +92,11 @@ export class PlanService {
     return getOnlyPlansRowOrThrow({ organizationId, id: planId });
   }
 
-  private async queueCreation(organization: OrganizationsRow, plan: PlansRow) {
+  async safelyQueueCreation(organization: OrganizationsRow, plan: PlansRow) {
+    const existingCreation = await getPostageCreationQueueRows({ organizationId: organization.id });
+    if (existingCreation.length > 0) {
+      return;
+    }
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
     const blockPrice = await this.beeService.getDataPricePerBlock();
     const amount = Utils.getAmountForDuration(Duration.fromDays(DAYS_TO_PURCHASE_POSTAGE_BATCH), blockPrice);
@@ -112,7 +117,7 @@ export class PlanService {
     }
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
     const depth = Utils.getDepthForSize(Size.fromGigabytes(requestedGbs));
-    const postageBatch = await this.beeService.getPostageBatch(organization.beeId!, organization.postageBatchId);
+    const postageBatch = await this.beeService.getPostageBatch(organization.beeId, organization.postageBatchId);
     if (depth > postageBatch.depth) {
       await insertPostageDiluteQueueRow({
         organizationId: organization.id,
