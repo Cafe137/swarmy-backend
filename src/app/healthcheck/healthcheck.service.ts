@@ -29,8 +29,8 @@ export class HealthcheckService {
       this.alertService.sendAlert(message);
       throw new InternalServerErrorException(message);
     }
-    if (topology.depth < 7 || topology.depth > 17) {
-      const message = `Depth not in range [7, 17]: ${topology.depth}`;
+    if (topology.depth < 5 || topology.depth > 15) {
+      const message = `Depth not in range [5, 15]: ${topology.depth}`;
       this.logger.error(message);
       this.alertService.sendAlert(message);
       throw new InternalServerErrorException(message);
