@@ -6,8 +6,6 @@ import { BeesRowId, getOnlyOrganizationsRowOrThrow, OrganizationsRowId } from '.
 import { BeeHiveService } from './bee-hive.service';
 import { BeeNode } from './bee-node';
 
-const AMOUNT_FOR_ONE_DAY = 414720000;
-
 @Injectable()
 export class BeeService {
   constructor(private readonly beeHive: BeeHiveService) {}

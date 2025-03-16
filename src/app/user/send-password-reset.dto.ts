@@ -1,3 +1,3 @@
 export class SendPasswordResetDto {
-  email: string;
+  constructor(public email: string) {}
 }

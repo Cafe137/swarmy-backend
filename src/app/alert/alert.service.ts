@@ -19,7 +19,7 @@ export class AlertService {
     this.sendAlert('Server started');
   }
 
-  async sendAlert(message: string, error?: Error) {
+  async sendAlert(message: string, error?: unknown) {
     axios
       .post(`https://api.telegram.org/bot${this.telegramToken}/sendMessage`, {
         chat_id: this.chatId,

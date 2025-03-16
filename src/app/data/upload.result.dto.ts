@@ -1,3 +1,3 @@
 export class UploadResultDto {
-  id: number;
+  constructor(public id: number) {}
 }

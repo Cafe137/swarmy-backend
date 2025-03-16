@@ -1,3 +1,3 @@
 export class VerifyEmailDto {
-  code: string;
+  constructor(public code: string) {}
 }

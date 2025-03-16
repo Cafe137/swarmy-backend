@@ -1,3 +1,3 @@
 export class FeedDto {
-  name: string;
+  constructor(public name: string) {}
 }

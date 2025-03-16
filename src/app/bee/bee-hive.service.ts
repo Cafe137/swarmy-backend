@@ -53,7 +53,7 @@ export class BeeHiveService {
     return this.beeNodes[0];
   }
 
-  private minBy(n, e) {
+  private minBy<T>(n: T[], e: (x: T) => number): T {
     return n.reduce((t, r) => (e(t) > e(r) ? t : r));
   }
 }

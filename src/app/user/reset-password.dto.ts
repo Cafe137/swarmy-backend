@@ -1,4 +1,6 @@
 export class ResetPasswordDto {
-  token: string;
-  password: string;
+  constructor(
+    public token: string,
+    public password: string,
+  ) {}
 }

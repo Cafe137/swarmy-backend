@@ -1,3 +1,3 @@
 export class UserDto {
-  username: string;
+  constructor(public username: string) {}
 }

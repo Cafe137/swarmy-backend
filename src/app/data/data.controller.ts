@@ -15,12 +15,14 @@ import {
 } from '@nestjs/common';
 
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Binary } from 'cafe-utility';
 import { Request, Response } from 'express';
 import { OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
 import { ApiKeyGuard } from '../api-key/api-key.guard';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { UserInContext } from '../user/user.decorator';
+import { DataDto } from './data.dto';
 import { DownloadService } from './download.service';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
@@ -70,6 +72,21 @@ export class DataController {
 
   @Public()
   @UseGuards(ApiKeyGuard)
+  @Post('api/data')
+  uploadDataApi(
+    @OrganizationInContext() organization: OrganizationsRow,
+    @Body() dataDto: DataDto,
+  ): Promise<UploadResultDto> {
+    return this.uploadService.uploadData(
+      organization,
+      dataDto.name,
+      dataDto.contentType,
+      Binary.hexToUint8Array(dataDto.dataAsHex),
+    );
+  }
+
+  @Public()
+  @UseGuards(ApiKeyGuard)
   @Get('api/files')
   async getFileList(@OrganizationInContext() organization: OrganizationsRow) {
     const result = await this.fileReferenceService.getFileReferences(organization.id);
@@ -97,7 +114,7 @@ export class DataController {
       response.header(key, result.headers[key]);
     }
     // todo maybe add cookie only for sites
-    return response.status(200).cookie('k', request['key']).send(result.data.toUint8Array());
+    return response.status(200).cookie('k', request.get('key')).send(result.data.toUint8Array());
   }
 
   @Public()

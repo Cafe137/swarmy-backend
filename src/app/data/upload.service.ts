@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import * as fs from 'node:fs';
+import { rm, writeFile } from 'node:fs/promises';
 import { insertUploadToBeeQueueRow, OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
@@ -28,22 +29,57 @@ export class UploadService {
   ): Promise<UploadResultDto> {
     if (!organization.postageBatchId) {
       this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
-      fs.rmSync(file.path);
+      await rm(file.path);
       throw new BadRequestException();
     }
     await this.verifyPostageBatch(organization);
     if (uploadAsWebsite) {
       if (!['application/x-tar', 'application/octet-stream'].includes(file.mimetype)) {
-        fs.rmSync(file.path);
+        await rm(file.path);
         throw new BadRequestException('Not a .tar file');
       }
     }
     const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
 
-    const fileRef = await this.fileReferenceService.createFileReference(organization, file, uploadAsWebsite ?? false);
+    const fileRef = await this.fileReferenceService.createFileReference(
+      organization,
+      file.size,
+      file.originalname,
+      file.mimetype.split(';')[0],
+      uploadAsWebsite ?? false,
+    );
 
     await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: file.path });
+    return { id: fileRef.id };
+  }
+
+  async uploadData(
+    organization: OrganizationsRow,
+    name: string,
+    contentType: string,
+    data: Uint8Array,
+  ): Promise<UploadResultDto> {
+    if (!organization.postageBatchId) {
+      this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
+      throw new BadRequestException();
+    }
+    await this.verifyPostageBatch(organization);
+    const size = this.roundUp(data.byteLength, BEE_MIN_CHUNK_SIZE);
+    await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
+
+    const fileRef = await this.fileReferenceService.createFileReference(
+      organization,
+      data.byteLength,
+      name,
+      contentType,
+      false,
+    );
+
+    const tempName = Strings.randomHex(32);
+    await writeFile(tempName, data);
+
+    await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: tempName });
     return { id: fileRef.id };
   }
 

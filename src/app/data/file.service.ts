@@ -13,12 +13,18 @@ import {
 export class FileReferenceService {
   constructor() {}
 
-  async createFileReference(organization: OrganizationsRow, file: Express.Multer.File, isWebsite: boolean) {
+  async createFileReference(
+    organization: OrganizationsRow,
+    size: number,
+    name: string,
+    contentType: string,
+    isWebsite: boolean,
+  ) {
     const id = await insertFileReferencesRow({
       organizationId: organization.id,
-      size: file.size,
-      name: file.originalname,
-      contentType: file.mimetype.split(';')[0],
+      size,
+      name,
+      contentType,
       isWebsite: isWebsite ? 1 : 0,
     });
     return getOnlyFileReferencesRowOrThrow({ id });

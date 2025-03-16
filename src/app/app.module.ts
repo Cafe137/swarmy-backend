@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { Strings } from 'cafe-utility';
 import { LoggerModule } from 'nestjs-pino';
-import { v4 as uuidv4 } from 'uuid';
 import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
 import { CryptoPaymentModule } from './crypto-payment/crypto-payment.module';
@@ -59,7 +59,7 @@ import { UserModule } from './user/user.module';
             genReqId: function (req, res) {
               const existingID = req.id ?? req.headers['x-request-id'];
               if (existingID) return existingID;
-              const id = uuidv4();
+              const id = Strings.randomHex(20);
               res.setHeader('X-Request-Id', id);
               return id;
             },
