@@ -113,7 +113,7 @@ export class DataController {
     for (const key in result.headers) {
       response.header(key, result.headers[key]);
     }
-    return response.status(200).cookie('k', request.get('key')).send(result.data.toUint8Array());
+    return response.status(200).cookie('k', request.get('key')).send(Buffer.from(result.data.toUint8Array()));
   }
 
   @Public()
@@ -129,7 +129,7 @@ export class DataController {
     for (const key in result.headers) {
       response.header(key, result.headers[key]);
     }
-    return response.status(200).cookie('k', request.get('key')).send(result.data.toUint8Array());
+    return response.status(200).cookie('k', request.get('key')).send(Buffer.from(result.data.toUint8Array()));
   }
 
   @Public()
@@ -147,7 +147,7 @@ export class DataController {
       for (const key in result.headers) {
         response.header(key, result.headers[key]);
       }
-      return response.status(200).send(result.data.toUint8Array());
+      return response.status(200).send(Buffer.from(result.data.toUint8Array()));
     } catch (error) {
       return response.status(404).json({ message: 'not found' });
     }
