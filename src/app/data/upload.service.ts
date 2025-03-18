@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Strings } from 'cafe-utility';
+import { Binary, MerkleTree, Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { createReadStream } from 'node:fs';
 import { rm, writeFile } from 'node:fs/promises';
 import { insertUploadToBeeQueueRow, OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
@@ -39,6 +40,15 @@ export class UploadService {
         throw new BadRequestException('Not a .tar file');
       }
     }
+
+    const readStream = createReadStream(file.path);
+    const tree = new MerkleTree(MerkleTree.NOOP);
+    for await (const chunk of readStream) {
+      tree.append(chunk);
+    }
+    const rootHash = await tree.finalize();
+    const swarmReference = Binary.uint8ArrayToHex(rootHash.hash());
+
     const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
 
@@ -48,10 +58,11 @@ export class UploadService {
       file.originalname,
       file.mimetype.split(';')[0],
       uploadAsWebsite ?? false,
+      swarmReference,
     );
 
     await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: file.path });
-    return { id: fileRef.id };
+    return { id: fileRef.id, swarmReference };
   }
 
   async uploadData(
@@ -68,19 +79,23 @@ export class UploadService {
     const size = this.roundUp(data.byteLength, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
 
+    const rootHash = await MerkleTree.root(data);
+    const swarmReference = Binary.uint8ArrayToHex(rootHash.hash());
+
     const fileRef = await this.fileReferenceService.createFileReference(
       organization,
       data.byteLength,
       name,
       contentType,
       false,
+      swarmReference,
     );
 
     const tempName = Strings.randomHex(32);
     await writeFile(tempName, data);
 
     await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: tempName });
-    return { id: fileRef.id };
+    return { id: fileRef.id, swarmReference };
   }
 
   private async verifyPostageBatch(organization: OrganizationsRow) {
