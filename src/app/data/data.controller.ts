@@ -15,9 +15,9 @@ import {
 } from '@nestjs/common';
 
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Binary, Types } from 'cafe-utility';
+import { Binary } from 'cafe-utility';
 import { Request, Response } from 'express';
-import { FileReferencesRowId, OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
+import { OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
 import { ApiKeyGuard } from '../api-key/api-key.guard';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
@@ -110,22 +110,6 @@ export class DataController {
     @Req() request: Request,
   ) {
     const result = await this.downloadService.download(organization, hash);
-    for (const key in result.headers) {
-      response.header(key, result.headers[key]);
-    }
-    return response.status(200).cookie('k', request.get('key')).send(Buffer.from(result.data.toUint8Array()));
-  }
-
-  @Public()
-  @UseGuards(ApiKeyGuard)
-  @Get('fileIds/:id')
-  async downloadFileById(
-    @OrganizationInContext() organization: OrganizationsRow,
-    @Param('id') id: number,
-    @Res() response: Response,
-    @Req() request: Request,
-  ) {
-    const result = await this.downloadService.downloadById(organization, Types.asId(id) as FileReferencesRowId);
     for (const key in result.headers) {
       response.header(key, result.headers[key]);
     }

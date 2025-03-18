@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { FileReferencesRowId, getOnlyFileReferencesRowOrNull, OrganizationsRow } from 'src/DatabaseExtra';
+import { OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
@@ -18,16 +18,6 @@ export class DownloadService {
     private alertService: AlertService,
   ) {}
 
-  async downloadById(organization: OrganizationsRow, id: FileReferencesRowId): Promise<DownloadResult> {
-    const fileRef = await getOnlyFileReferencesRowOrNull({ organizationId: organization.id, id });
-
-    if (!fileRef || !fileRef.hash) {
-      throw new NotFoundException();
-    }
-
-    return this.download(organization, fileRef.hash);
-  }
-
   async download(organization: OrganizationsRow, hash: string, path?: string): Promise<DownloadResult> {
     await this.verifyPostageBatch(organization);
 
@@ -38,7 +28,6 @@ export class DownloadService {
     await this.usageMetricsService.incrementOrFail(organization.id, 'down', fileRef.size);
     const result = await this.beeService.download(hash, path);
 
-    this.logger.info('CONTENT TYPE:' + result.contentType);
     const headers: Record<string, string> = {};
     if (fileRef.isWebsite && result.contentType) {
       headers['Content-Type'] = result.contentType;

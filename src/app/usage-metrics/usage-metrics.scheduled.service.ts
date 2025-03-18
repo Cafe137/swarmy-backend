@@ -5,7 +5,7 @@ import { getUsageMetricsRows, updateUsageMetricsRow } from 'src/DatabaseExtra';
 
 @Injectable()
 export class UsageMetricsScheduledService {
-  @Interval(Dates.minutes(5))
+  @Interval(Dates.hours(1))
   async checkUsageMetricsForRollover() {
     const usageMetrics = await getUsageMetricsRows({ type: 'DOWNLOADED_BYTES' });
     for (const usageMetric of usageMetrics) {

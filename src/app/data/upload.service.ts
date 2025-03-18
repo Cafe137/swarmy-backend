@@ -3,10 +3,11 @@ import { Binary, MerkleTree, Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { createReadStream } from 'node:fs';
 import { rm, writeFile } from 'node:fs/promises';
-import { insertUploadToBeeQueueRow, OrganizationsRow } from 'src/DatabaseExtra';
+import { OrganizationsRow } from 'src/DatabaseExtra';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
+import { createManifestWrapper } from '../utility/utility';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
 
@@ -49,6 +50,10 @@ export class UploadService {
     const rootHash = await tree.finalize();
     const swarmReference = Binary.uint8ArrayToHex(rootHash.hash());
 
+    const contentType = file.mimetype.split(';')[0];
+
+    const manifest = createManifestWrapper(file.originalname, contentType, rootHash.hash());
+
     const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
 
@@ -56,12 +61,12 @@ export class UploadService {
       organization,
       file.size,
       file.originalname,
-      file.mimetype.split(';')[0],
+      contentType,
       uploadAsWebsite ?? false,
-      swarmReference,
+      (await manifest.calculateSelfAddress()).toHex(),
+      file.path,
     );
 
-    await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: file.path });
     return { id: fileRef.id, swarmReference };
   }
 
@@ -82,19 +87,21 @@ export class UploadService {
     const rootHash = await MerkleTree.root(data);
     const swarmReference = Binary.uint8ArrayToHex(rootHash.hash());
 
+    const manifest = createManifestWrapper(name, contentType, rootHash.hash());
+
+    const tempName = Strings.randomHex(32);
+    await writeFile(tempName, data);
+
     const fileRef = await this.fileReferenceService.createFileReference(
       organization,
       data.byteLength,
       name,
       contentType,
       false,
-      swarmReference,
+      (await manifest.calculateSelfAddress()).toHex(),
+      tempName,
     );
 
-    const tempName = Strings.randomHex(32);
-    await writeFile(tempName, data);
-
-    await insertUploadToBeeQueueRow({ fileReferenceId: fileRef.id, pathOnDisk: tempName });
     return { id: fileRef.id, swarmReference };
   }
 

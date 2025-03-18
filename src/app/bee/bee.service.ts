@@ -15,9 +15,16 @@ export class BeeService {
     return bee.download(hash, path);
   }
 
-  async upload(beeId: BeesRowId, postageBatchId: string, data: Readable, fileName: string, uploadAsWebsite?: boolean) {
+  async upload(
+    beeId: BeesRowId,
+    postageBatchId: string,
+    data: Readable,
+    fileName: string,
+    contentType: string,
+    uploadAsWebsite?: boolean,
+  ) {
     const bee = await this.beeHive.getBeeById(beeId);
-    return bee.upload(postageBatchId, data, fileName, uploadAsWebsite);
+    return bee.upload(postageBatchId, data, fileName, contentType, uploadAsWebsite);
   }
 
   async getDataPricePerBlock() {

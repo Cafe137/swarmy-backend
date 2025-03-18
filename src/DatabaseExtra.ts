@@ -96,6 +96,7 @@ export interface FileReferencesRow {
   hits: number;
   isWebsite: 0 | 1;
   uploaded: 0 | 1;
+  pathOnDisk: string;
   createdAt: Date;
 }
 
@@ -279,6 +280,7 @@ export interface NewFileReferencesRow {
   hits?: number | null;
   isWebsite: 0 | 1;
   uploaded?: 0 | 1 | null;
+  pathOnDisk: string;
   createdAt?: Date | null;
 }
 

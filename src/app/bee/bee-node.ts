@@ -1,7 +1,8 @@
-import { BatchId, Bee, Bytes, FileData } from '@ethersphere/bee-js';
+import { BatchId, Bee, Bytes, FileData, MerkleTree } from '@ethersphere/bee-js';
 import { PinoLogger } from 'nestjs-pino';
 import { Readable } from 'stream';
 import { BeesRow } from '../../DatabaseExtra';
+import { createManifestWrapper } from '../utility/utility';
 
 export class BeeNode {
   constructor(beeRow: BeesRow, logger: PinoLogger) {
@@ -13,31 +14,47 @@ export class BeeNode {
   beeRow: BeesRow;
   bee: Bee;
   downloads: number = 0;
-  isUploading: boolean = false;
   private logger: PinoLogger;
 
   async download(hash: string, path?: string): Promise<FileData<Bytes>> {
     return this.bee.downloadFile(hash, path);
   }
 
-  async upload(postageBatchId: string, data: Readable, fileName: string, uploadAsWebsite?: boolean) {
-    try {
-      this.isUploading = true;
-      const requestOptions = uploadAsWebsite
-        ? {
-            headers: {
-              'Swarm-Index-Document': 'index.html',
-              'Swarm-Collection': 'true',
-            },
-          }
-        : undefined;
-      const options = uploadAsWebsite ? { contentType: 'application/x-tar' } : undefined;
-      return await this.bee.uploadFile(postageBatchId, data, fileName, options, requestOptions);
-    } catch (e) {
-      throw e;
-    } finally {
-      this.isUploading = false;
+  async upload(
+    postageBatchId: string,
+    data: Readable,
+    fileName: string,
+    contentType: string,
+    uploadAsWebsite?: boolean,
+  ) {
+    if (uploadAsWebsite) {
+      return await this.uploadWebsite(postageBatchId, data, fileName);
+    } else {
+      const merkleTree = new MerkleTree(async (chunk) => {
+        await this.bee.uploadChunk(postageBatchId, chunk.build());
+      });
+      for await (const chunk of data) {
+        await merkleTree.append(chunk);
+      }
+      const result = await merkleTree.finalize();
+      const manifest = createManifestWrapper(fileName, contentType, result.hash());
+      return await manifest.saveRecursively(this.bee, postageBatchId);
     }
+  }
+
+  async uploadWebsite(postageBatchId: string, data: Readable, fileName: string) {
+    return await this.bee.uploadFile(
+      postageBatchId,
+      data,
+      fileName,
+      { contentType: 'application/x-tar' },
+      {
+        headers: {
+          'Swarm-Index-Document': 'index.html',
+          'Swarm-Collection': 'true',
+        },
+      },
+    );
   }
 
   async getAllPostageBatches() {

@@ -20,15 +20,14 @@ export class BeeHiveService {
     return this.beeNodes;
   }
 
-  @Interval(Dates.seconds(120))
+  @Interval(Dates.minutes(2))
   private async refreshBees() {
     const beeRows = await getBeesRows({ enabled: 1 });
     this.beeNodes = beeRows.map((row) => new BeeNode(row, this.logger));
-    this.logger.debug(`Refreshing bees completed. There are ${beeRows.length} bees in the hive.`);
   }
 
   public getBeeForDownload(): BeeNode {
-    let bees = this.beeNodes.filter((node) => node.beeRow.downloadEnabled && !node.isUploading);
+    let bees = this.beeNodes.filter((node) => node.beeRow.downloadEnabled);
     if (bees.length === 0) {
       bees = this.beeNodes.filter((node) => node.beeRow.downloadEnabled);
     }
@@ -48,7 +47,7 @@ export class BeeHiveService {
 
   getFirstBee() {
     if (this.beeNodes.length === 0) {
-      throw new Error(`No bees found. Can't return first one.`);
+      throw Error(`No bees found. Can't return first one.`);
     }
     return this.beeNodes[0];
   }

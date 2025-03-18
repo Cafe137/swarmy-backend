@@ -19,7 +19,8 @@ export class FileReferenceService {
     name: string,
     contentType: string,
     isWebsite: boolean,
-    rootHash: string,
+    hash: string,
+    pathOnDisk: string,
   ) {
     const id = await insertFileReferencesRow({
       organizationId: organization.id,
@@ -27,7 +28,8 @@ export class FileReferenceService {
       name,
       contentType,
       isWebsite: isWebsite ? 1 : 0,
-      hash: rootHash,
+      hash,
+      pathOnDisk,
     });
     return getOnlyFileReferencesRowOrThrow({ id });
   }
