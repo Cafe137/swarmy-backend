@@ -1,5 +1,5 @@
+import { BatchId, Bytes, BZZ, FileData, NULL_TOPIC, PostageBatch, Reference } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
-import { BatchId, Bytes, BZZ, FileData, NULL_TOPIC, PostageBatch, Reference } from '@upcoming/bee-js';
 import { Binary, Elliptic } from 'cafe-utility';
 import { Readable } from 'stream';
 import { BeesRowId, getOnlyOrganizationsRowOrThrow, OrganizationsRowId } from '../../DatabaseExtra';

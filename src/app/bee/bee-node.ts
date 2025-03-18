@@ -1,4 +1,4 @@
-import { BatchId, Bee, Bytes, FileData } from '@upcoming/bee-js';
+import { BatchId, Bee, Bytes, FileData } from '@ethersphere/bee-js';
 import { PinoLogger } from 'nestjs-pino';
 import { Readable } from 'stream';
 import { BeesRow } from '../../DatabaseExtra';

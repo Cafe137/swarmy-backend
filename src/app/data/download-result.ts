@@ -1,4 +1,4 @@
-import { Bytes } from '@upcoming/bee-js';
+import { Bytes } from '@ethersphere/bee-js';
 
 export interface DownloadResult {
   headers: Record<string, string>;

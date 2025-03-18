@@ -1,5 +1,5 @@
+import { Duration, Size, Utils } from '@ethersphere/bee-js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Duration, Size, Utils } from '@upcoming/bee-js';
 import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {

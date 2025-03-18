@@ -1,5 +1,5 @@
+import { BZZ, Topology } from '@ethersphere/bee-js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { BZZ, Topology } from '@upcoming/bee-js';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';

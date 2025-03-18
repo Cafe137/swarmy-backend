@@ -1,6 +1,6 @@
+import { Duration, Utils } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
-import { Duration, Utils } from '@upcoming/bee-js';
 import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
