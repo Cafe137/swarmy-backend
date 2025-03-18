@@ -28,18 +28,18 @@ export class GlacierService {
     this.client = new GlacierClient({
       region,
       credentials: {
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
+        accessKeyId,
+        secretAccessKey,
       },
     });
   }
 
-  async upload(data: Readable, description: string) {
+  async upload(body: Readable, archiveDescription: string) {
     const params: UploadArchiveCommandInput = {
       vaultName: this.vaultName,
-      body: data,
       accountId: this.accountId,
-      archiveDescription: description,
+      body,
+      archiveDescription,
     };
 
     const result = await this.client.send(new UploadArchiveCommand(params));

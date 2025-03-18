@@ -9,7 +9,6 @@ import {
   getOnlyOrganizationsRowOrThrow,
   updateFileReferencesRow,
 } from '../../DatabaseExtra';
-import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { GlacierService } from './glacier.service';
 import { ThumbnailService } from './thumbnail.service';
@@ -21,7 +20,6 @@ export class UploadToBeeQueueScheduledService {
     private readonly logger: PinoLogger,
     private beeService: BeeService,
     private thumbnailService: ThumbnailService,
-    private alertService: AlertService,
     private glacierService: GlacierService,
   ) {
     this.runLoop();
@@ -44,8 +42,8 @@ export class UploadToBeeQueueScheduledService {
     for (const file of files) {
       await this.runUploadJob(file);
       await this.archiveFile(file);
-      await rm(file.pathOnDisk);
       await updateFileReferencesRow(file.id, { uploaded: 1 });
+      await rm(file.pathOnDisk);
     }
   }
 

@@ -1,11 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Binary, MerkleTree, Strings } from 'cafe-utility';
+import { MerkleTree, Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { createReadStream } from 'node:fs';
 import { rm, writeFile } from 'node:fs/promises';
 import { OrganizationsRow } from 'src/DatabaseExtra';
-import { AlertService } from '../alert/alert.service';
-import { BeeService } from '../bee/bee.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { createManifestWrapper } from '../utility/utility';
 import { FileReferenceService } from './file.service';
@@ -20,8 +18,6 @@ export class UploadService {
     private readonly logger: PinoLogger,
     private usageMetricsService: UsageMetricsService,
     private fileReferenceService: FileReferenceService,
-    private beeService: BeeService,
-    private alertService: AlertService,
   ) {}
 
   async uploadFile(
@@ -34,7 +30,7 @@ export class UploadService {
       await rm(file.path);
       throw new BadRequestException();
     }
-    await this.verifyPostageBatch(organization);
+
     if (uploadAsWebsite) {
       if (!['application/x-tar', 'application/octet-stream'].includes(file.mimetype)) {
         await rm(file.path);
@@ -48,11 +44,11 @@ export class UploadService {
       tree.append(chunk);
     }
     const rootHash = await tree.finalize();
-    const swarmReference = Binary.uint8ArrayToHex(rootHash.hash());
 
     const contentType = file.mimetype.split(';')[0];
 
     const manifest = createManifestWrapper(file.originalname, contentType, rootHash.hash());
+    const swarmReference = (await manifest.calculateSelfAddress()).toHex();
 
     const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
@@ -63,7 +59,7 @@ export class UploadService {
       file.originalname,
       contentType,
       uploadAsWebsite ?? false,
-      (await manifest.calculateSelfAddress()).toHex(),
+      swarmReference,
       file.path,
     );
 
@@ -80,14 +76,13 @@ export class UploadService {
       this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
       throw new BadRequestException();
     }
-    await this.verifyPostageBatch(organization);
     const size = this.roundUp(data.byteLength, BEE_MIN_CHUNK_SIZE);
     await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
 
     const rootHash = await MerkleTree.root(data);
-    const swarmReference = Binary.uint8ArrayToHex(rootHash.hash());
 
     const manifest = createManifestWrapper(name, contentType, rootHash.hash());
+    const swarmReference = (await manifest.calculateSelfAddress()).toHex();
 
     const tempName = Strings.randomHex(32);
     await writeFile(tempName, data);
@@ -103,23 +98,6 @@ export class UploadService {
     );
 
     return { id: fileRef.id, swarmReference };
-  }
-
-  private async verifyPostageBatch(organization: OrganizationsRow) {
-    if (!organization.postageBatchId) {
-      const message = `Upload attempted org ${organization.id} that doesn't have a postage batch`;
-      this.logger.error(message);
-      this.alertService.sendAlert(message);
-      throw new BadRequestException();
-    }
-    try {
-      await this.beeService.getPostageBatch(organization.beeId, organization.postageBatchId);
-    } catch (e) {
-      const message = `Upload attempted by org: ${organization.id} with postage batch ${organization.postageBatchId} that doesn't exist on bee`;
-      this.alertService.sendAlert(message, e);
-      this.logger.error(e, message);
-      throw new BadRequestException();
-    }
   }
 
   roundUp(numToRound: number, multiple: number) {
