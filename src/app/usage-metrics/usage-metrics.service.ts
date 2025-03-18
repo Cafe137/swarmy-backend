@@ -19,6 +19,7 @@ export class UsageMetricsService {
   ) {}
 
   async incrementOrFail(organizationId: OrganizationsRowId, type: 'up' | 'down', value: number) {
+    value = this.roundUp(value, 8192);
     const metric = await this.getForOrganization(organizationId, type === 'up' ? 'UPLOADED_BYTES' : 'DOWNLOADED_BYTES');
     const newValue = metric.used + value;
     if (newValue > metric.available) {
@@ -68,5 +69,18 @@ export class UsageMetricsService {
     type: UsageMetricType,
   ): Promise<UsageMetricsRow> {
     return getOnlyUsageMetricsRowOrThrow({ organizationId, type });
+  }
+
+  private roundUp(numToRound: number, multiple: number) {
+    if (multiple === 0) {
+      return numToRound;
+    }
+
+    const remainder = numToRound % multiple;
+    if (remainder === 0) {
+      return numToRound;
+    }
+
+    return numToRound + multiple - remainder;
   }
 }

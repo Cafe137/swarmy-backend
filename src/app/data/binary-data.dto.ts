@@ -1,7 +1,7 @@
-export class DataDto {
+export class BinaryDataDto {
   constructor(
     public name: string,
     public contentType: string,
-    public dataAsHex: string,
+    public base64: string,
   ) {}
 }

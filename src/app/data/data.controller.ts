@@ -22,11 +22,12 @@ import { ApiKeyGuard } from '../api-key/api-key.guard';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { UserInContext } from '../user/user.decorator';
-import { DataDto } from './data.dto';
+import { BinaryDataDto } from './binary-data.dto';
 import { DownloadService } from './download.service';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
 import { UploadService } from './upload.service';
+import { Utf8DataDto } from './utf8-data.dto';
 
 const MAX_FILE_SIZE = 1024 * 1024 * 1024; // 1gb
 
@@ -72,17 +73,27 @@ export class DataController {
 
   @Public()
   @UseGuards(ApiKeyGuard)
-  @Post('api/data')
-  uploadDataApi(
+  @Post('api/data/bin')
+  uploadBinaryDataApi(
     @OrganizationInContext() organization: OrganizationsRow,
-    @Body() dataDto: DataDto,
+    @Body() dataDto: BinaryDataDto,
   ): Promise<UploadResultDto> {
-    return this.uploadService.uploadData(
+    return this.uploadService.uploadBinaryData(
       organization,
       dataDto.name,
       dataDto.contentType,
-      Binary.hexToUint8Array(dataDto.dataAsHex),
+      Binary.base64ToUint8Array(dataDto.base64),
     );
+  }
+
+  @Public()
+  @UseGuards(ApiKeyGuard)
+  @Post('api/data/utf8')
+  uploadUtf8DataApi(
+    @OrganizationInContext() organization: OrganizationsRow,
+    @Body() dataDto: Utf8DataDto,
+  ): Promise<UploadResultDto> {
+    return this.uploadService.uploadUtf8Data(organization, dataDto.name, dataDto.contentType, dataDto.utf8);
   }
 
   @Public()

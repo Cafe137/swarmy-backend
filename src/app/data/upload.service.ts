@@ -9,7 +9,7 @@ import { createManifestWrapper } from '../utility/utility';
 import { FileReferenceService } from './file.service';
 import { UploadResultDto } from './upload.result.dto';
 
-const BEE_MIN_CHUNK_SIZE = 8192; // chunk + metadata 4K each
+const ENCODER = new TextEncoder();
 
 @Injectable()
 export class UploadService {
@@ -26,7 +26,6 @@ export class UploadService {
     uploadAsWebsite?: boolean,
   ): Promise<UploadResultDto> {
     if (!organization.postageBatchId) {
-      this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
       await rm(file.path);
       throw new BadRequestException();
     }
@@ -50,8 +49,7 @@ export class UploadService {
     const manifest = createManifestWrapper(file.originalname, contentType, rootHash.hash());
     const swarmReference = (await manifest.calculateSelfAddress()).toHex();
 
-    const size = this.roundUp(file.size, BEE_MIN_CHUNK_SIZE);
-    await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
+    await this.usageMetricsService.incrementOrFail(organization.id, 'up', file.size);
 
     const fileRef = await this.fileReferenceService.createFileReference(
       organization,
@@ -66,18 +64,27 @@ export class UploadService {
     return { id: fileRef.id, swarmReference };
   }
 
-  async uploadData(
+  async uploadUtf8Data(
+    organization: OrganizationsRow,
+    name: string,
+    contentType: string,
+    utf8: string,
+  ): Promise<UploadResultDto> {
+    const data = ENCODER.encode(utf8);
+    return this.uploadBinaryData(organization, name, contentType, data);
+  }
+
+  async uploadBinaryData(
     organization: OrganizationsRow,
     name: string,
     contentType: string,
     data: Uint8Array,
   ): Promise<UploadResultDto> {
     if (!organization.postageBatchId) {
-      this.logger.info(`Upload attempted org ${organization.id} that doesn't have a postage batch`);
       throw new BadRequestException();
     }
-    const size = this.roundUp(data.byteLength, BEE_MIN_CHUNK_SIZE);
-    await this.usageMetricsService.incrementOrFail(organization.id, 'up', size);
+
+    await this.usageMetricsService.incrementOrFail(organization.id, 'up', data.byteLength);
 
     const rootHash = await MerkleTree.root(data);
 
@@ -98,14 +105,5 @@ export class UploadService {
     );
 
     return { id: fileRef.id, swarmReference };
-  }
-
-  roundUp(numToRound: number, multiple: number) {
-    if (multiple === 0) return numToRound;
-
-    const remainder = numToRound % multiple;
-    if (remainder === 0) return numToRound;
-
-    return numToRound + multiple - remainder;
   }
 }
