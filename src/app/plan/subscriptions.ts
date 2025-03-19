@@ -5,12 +5,12 @@ export const subscriptionConfig = {
     defaultOption: 4,
     options: [
       { size: 4, exp: 2, label: '4 GB' },
-      { size: 17, exp: 4, label: '17 GB' },
-      { size: 44, exp: 5, label: '44 GB' },
-      { size: 102, exp: 7, label: '102 GB' },
-      { size: 225, exp: 8, label: '225 GB' },
-      { size: 480, exp: 9, label: '480 GB' },
-      { size: 1000, exp: 10, label: '1 TB' },
+      { size: 17, exp: 3, label: '17 GB' },
+      { size: 44, exp: 4, label: '44 GB' },
+      { size: 102, exp: 5, label: '102 GB' },
+      { size: 225, exp: 6, label: '225 GB' },
+      { size: 480, exp: 7, label: '480 GB' },
+      { size: 1000, exp: 8, label: '1 TB' },
     ],
   },
   bandwidth: {
