@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import {
   FileReferencesRow,
   getFileReferencesRows,
-  getOnlyFileReferencesRowOrNull,
   getOnlyFileReferencesRowOrThrow,
   insertFileReferencesRow,
   OrganizationsRow,
@@ -38,7 +37,8 @@ export class FileReferenceService {
     return getFileReferencesRows({ organizationId }, { order: { column: 'id', direction: 'DESC' } });
   }
 
-  async getFileReference(organization: OrganizationsRow, hash: string) {
-    return getOnlyFileReferencesRowOrNull({ organizationId: organization.id, hash });
+  async getFileReference(organization: OrganizationsRow, hash: string): Promise<FileReferencesRow | null> {
+    const rows = await getFileReferencesRows({ organizationId: organization.id, hash }, { limit: 1 });
+    return rows.length ? rows[0] : null;
   }
 }
