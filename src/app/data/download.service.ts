@@ -29,12 +29,8 @@ export class DownloadService {
     const result = await this.beeService.download(hash, path);
 
     const headers: Record<string, string> = {};
-    if (fileRef.isWebsite && result.contentType) {
+    if (result.contentType) {
       headers['Content-Type'] = result.contentType;
-    }
-    if (!fileRef.isWebsite) {
-      headers['Content-Type'] = fileRef.contentType;
-      headers['Content-Disposition'] = `attachment; filename="${fileRef.name}"`;
     }
     return {
       headers,
