@@ -39,7 +39,7 @@ export class UploadService {
     const data = await readFile(file.path);
 
     const tree = new MerkleTree(MerkleTree.NOOP);
-    tree.append(data);
+    await tree.append(data);
     const rootHash = await tree.finalize();
 
     const contentType = file.mimetype.split(';')[0];
@@ -58,8 +58,6 @@ export class UploadService {
       swarmReference,
       file.path,
     );
-
-    this.logger.info('Received file', { file: fileRef.id, byteLength: data.byteLength });
 
     return { id: fileRef.id, swarmReference };
   }

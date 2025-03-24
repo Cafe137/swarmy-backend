@@ -50,7 +50,6 @@ export class UploadToBeeQueueScheduledService {
   private async runUploadJob(file: FileReferencesRow) {
     const organization = await getOnlyOrganizationsRowOrThrow({ id: file.organizationId });
     const data = await readFile(file.pathOnDisk);
-    this.logger.info('Uploading file', { file: file.id, byteLength: data.byteLength });
     const uploadResult = await this.beeService.upload(
       organization.beeId,
       organization.postageBatchId!,
