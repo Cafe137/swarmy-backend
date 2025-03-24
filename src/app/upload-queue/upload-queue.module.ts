@@ -4,13 +4,12 @@ import { BeeModule } from '../bee/bee.module';
 import { DataModule } from '../data/data.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { GlacierService } from './glacier.service';
-import { ThumbnailService } from './thumbnail.service';
 import { UploadToBeeQueueScheduledService } from './upload-to-bee-queue.scheduled.service';
 
 @Module({
   imports: [AlertModule, DataModule, BeeModule, OrganizationModule],
   controllers: [],
-  providers: [UploadToBeeQueueScheduledService, GlacierService, ThumbnailService],
+  providers: [UploadToBeeQueueScheduledService, GlacierService],
   exports: [],
 })
 export class UploadQueueModule {}

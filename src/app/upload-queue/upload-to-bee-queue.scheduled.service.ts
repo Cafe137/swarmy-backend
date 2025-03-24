@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { Dates, System } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { createReadStream } from 'node:fs';
-import { rm } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import {
   FileReferencesRow,
   getFileReferencesRows,
   getOnlyOrganizationsRowOrThrow,
   updateFileReferencesRow,
 } from '../../DatabaseExtra';
+import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { GlacierService } from './glacier.service';
-import { ThumbnailService } from './thumbnail.service';
 
 @Injectable()
 export class UploadToBeeQueueScheduledService {
@@ -19,8 +19,8 @@ export class UploadToBeeQueueScheduledService {
     @InjectPinoLogger(UploadToBeeQueueScheduledService.name)
     private readonly logger: PinoLogger,
     private beeService: BeeService,
-    private thumbnailService: ThumbnailService,
     private glacierService: GlacierService,
+    private alertService: AlertService,
   ) {
     this.runLoop();
   }
@@ -49,8 +49,8 @@ export class UploadToBeeQueueScheduledService {
 
   private async runUploadJob(file: FileReferencesRow) {
     const organization = await getOnlyOrganizationsRowOrThrow({ id: file.organizationId });
-    const data = createReadStream(file.pathOnDisk);
-    const thumbnail = await this.thumbnailService.safeCreateThumbnail(file, data);
+    const data = await readFile(file.pathOnDisk);
+    this.logger.info('Uploading file', { file: file.id, byteLength: data.byteLength });
     const uploadResult = await this.beeService.upload(
       organization.beeId,
       organization.postageBatchId!,
@@ -59,10 +59,14 @@ export class UploadToBeeQueueScheduledService {
       file.contentType,
       file.isWebsite === 1,
     );
+    if (uploadResult.reference.toHex() !== file.hash) {
+      this.alertService.sendAlert(
+        `File hash mismatch for ID ${file.id}, before: ${file.hash}, after: ${uploadResult.reference.toHex()}`,
+      );
+    }
     await updateFileReferencesRow(file.id, {
       hash: uploadResult.reference.toHex(),
       uploaded: 1,
-      thumbnailBase64: thumbnail,
     });
   }
 

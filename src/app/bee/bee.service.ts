@@ -1,7 +1,6 @@
 import { BatchId, Bytes, BZZ, FileData, NULL_TOPIC, PostageBatch, Reference } from '@ethersphere/bee-js';
 import { Injectable } from '@nestjs/common';
 import { Binary, Elliptic } from 'cafe-utility';
-import { Readable } from 'stream';
 import { BeesRowId, getOnlyOrganizationsRowOrThrow, OrganizationsRowId } from '../../DatabaseExtra';
 import { BeeHiveService } from './bee-hive.service';
 import { BeeNode } from './bee-node';
@@ -15,10 +14,20 @@ export class BeeService {
     return bee.download(hash, path);
   }
 
+  async getPublicDataViaBzz(hash: string, path?: string) {
+    const bee = this.beeHive.getBeeForDownload();
+    return bee.getPublicDataViaBzz(hash, path);
+  }
+
+  async getPublicDataViaBytes(hash: string) {
+    const bee = this.beeHive.getBeeForDownload();
+    return bee.getPublicDataViaBytes(hash);
+  }
+
   async upload(
     beeId: BeesRowId,
     postageBatchId: string,
-    data: Readable,
+    data: Buffer,
     fileName: string,
     contentType: string,
     uploadAsWebsite?: boolean,

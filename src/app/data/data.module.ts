@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MulterModule } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { AlertModule } from '../alert/alert.module';
 import { ApiKeyModule } from '../api-key/api-key.module';
 import { BeeModule } from '../bee/bee.module';
+import { BeeService } from '../bee/bee.service';
 import { OrganizationModule } from '../organization/organization.module';
 import { PlanModule } from '../plan/plan.module';
 import { UsageMetricsModule } from '../usage-metrics/usage-metrics.module';
@@ -9,9 +13,6 @@ import { DataController } from './data.controller';
 import { DownloadService } from './download.service';
 import { FileReferenceService } from './file.service';
 import { UploadService } from './upload.service';
-import { MulterModule } from '@nestjs/platform-express';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { diskStorage } from 'multer';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { diskStorage } from 'multer';
     }),
   ],
   controllers: [DataController],
-  providers: [UploadService, FileReferenceService, DownloadService],
+  providers: [UploadService, FileReferenceService, DownloadService, BeeService],
   exports: [],
 })
 export class DataModule {}

@@ -1,6 +1,5 @@
 import { BatchId, Bee, Bytes, FileData, MerkleTree } from '@ethersphere/bee-js';
 import { PinoLogger } from 'nestjs-pino';
-import { Readable } from 'stream';
 import { BeesRow } from '../../DatabaseExtra';
 import { createManifestWrapper } from '../utility/utility';
 
@@ -20,29 +19,29 @@ export class BeeNode {
     return this.bee.downloadFile(hash, path);
   }
 
-  async upload(
-    postageBatchId: string,
-    data: Readable,
-    fileName: string,
-    contentType: string,
-    uploadAsWebsite?: boolean,
-  ) {
+  async getPublicDataViaBzz(hash: string, path?: string) {
+    return this.bee.downloadFile(hash, path);
+  }
+
+  async getPublicDataViaBytes(hash: string) {
+    return this.bee.downloadData(hash);
+  }
+
+  async upload(postageBatchId: string, data: Buffer, fileName: string, contentType: string, uploadAsWebsite?: boolean) {
     if (uploadAsWebsite) {
       return await this.uploadWebsite(postageBatchId, data, fileName);
     } else {
       const merkleTree = new MerkleTree(async (chunk) => {
         await this.bee.uploadChunk(postageBatchId, chunk.build());
       });
-      for await (const chunk of data) {
-        await merkleTree.append(chunk);
-      }
+      await merkleTree.append(data);
       const result = await merkleTree.finalize();
       const manifest = createManifestWrapper(fileName, contentType, result.hash());
       return await manifest.saveRecursively(this.bee, postageBatchId);
     }
   }
 
-  async uploadWebsite(postageBatchId: string, data: Readable, fileName: string) {
+  async uploadWebsite(postageBatchId: string, data: Buffer, fileName: string) {
     return await this.bee.uploadFile(
       postageBatchId,
       data,

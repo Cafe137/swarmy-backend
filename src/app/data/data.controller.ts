@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   MaxFileSizeValidator,
   Param,
@@ -17,7 +18,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Binary } from 'cafe-utility';
 import { Request, Response } from 'express';
-import { OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
+import { FileReferencesRowId, OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
 import { ApiKeyGuard } from '../api-key/api-key.guard';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
@@ -151,5 +152,43 @@ export class DataController {
   @Get('file-references')
   getFileReferencesForUser(@UserInContext() user: UsersRow) {
     return this.fileReferenceService.getFileReferences(user.organizationId);
+  }
+
+  @Delete('files/hash/:hash')
+  async deleteFileByHash(
+    @OrganizationInContext() organization: OrganizationsRow,
+    @Param('hash') hash: string,
+    @Res() response: Response,
+  ) {
+    await this.fileReferenceService.deleteFileByHash(organization, hash);
+    response.status(200).send();
+  }
+
+  @Delete('files/id/:id')
+  async deleteFileById(
+    @OrganizationInContext() organization: OrganizationsRow,
+    @Param('id') id: number,
+    @Res() response: Response,
+  ) {
+    await this.fileReferenceService.deleteFileById(organization, id as FileReferencesRowId);
+    response.status(200).send();
+  }
+
+  @Public()
+  @Get('bzz/:hash/*')
+  async getPublicDataViaBzz(@Param('hash') hash: string, @Req() request: Request, @Res() response: Response) {
+    const path = request.path.split(hash)[1];
+    const result = await this.fileReferenceService.getPublicDataViaBzz(hash, path);
+    return response
+      .status(200)
+      .header('Content-Type', result.contentType)
+      .send(Buffer.from(result.data.toUint8Array()));
+  }
+
+  @Public()
+  @Get('bytes/:hash')
+  async getPublicDataViaBytes(@Param('hash') hash: string, @Res() response: Response) {
+    const result = await this.fileReferenceService.getPublicDataViaBytes(hash);
+    return response.status(200).send(Buffer.from(result.toUint8Array()));
   }
 }

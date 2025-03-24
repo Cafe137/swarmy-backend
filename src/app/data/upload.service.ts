@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MerkleTree, Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { createReadStream } from 'node:fs';
-import { rm, writeFile } from 'node:fs/promises';
+import { readFile, rm, writeFile } from 'node:fs/promises';
 import { OrganizationsRow } from 'src/DatabaseExtra';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { createManifestWrapper } from '../utility/utility';
@@ -37,11 +36,10 @@ export class UploadService {
       }
     }
 
-    const readStream = createReadStream(file.path);
+    const data = await readFile(file.path);
+
     const tree = new MerkleTree(MerkleTree.NOOP);
-    for await (const chunk of readStream) {
-      tree.append(chunk);
-    }
+    tree.append(data);
     const rootHash = await tree.finalize();
 
     const contentType = file.mimetype.split(';')[0];
@@ -60,6 +58,8 @@ export class UploadService {
       swarmReference,
       file.path,
     );
+
+    this.logger.info('Received file', { file: fileRef.id, byteLength: data.byteLength });
 
     return { id: fileRef.id, swarmReference };
   }

@@ -61,6 +61,19 @@ export interface CryptoPaymentsRow {
   createdAt: Date;
 }
 
+export type DeletedFilesRowId = number & { __brand: 'DeletedFilesRowId' };
+export interface DeletedFilesRow {
+  id: DeletedFilesRowId;
+  archiveId?: string | null;
+  organizationId: OrganizationsRowId;
+  name: string;
+  contentType: string;
+  hash: string;
+  size: number;
+  originalCreatedAt: Date;
+  createdAt: Date;
+}
+
 export type FeedItemsRowId = number & { __brand: 'FeedItemsRowId' };
 export interface FeedItemsRow {
   id: FeedItemsRowId;
@@ -91,7 +104,7 @@ export interface FileReferencesRow {
   thumbnailBase64?: string | null;
   name: string;
   contentType: string;
-  hash?: string | null;
+  hash: string;
   size: number;
   hits: number;
   isWebsite: 0 | 1;
@@ -170,6 +183,16 @@ export interface PostageTopUpQueueRow {
   createdAt: Date;
 }
 
+export type PublicHashesRowId = number & { __brand: 'PublicHashesRowId' };
+export interface PublicHashesRow {
+  id: PublicHashesRowId;
+  hash: string;
+  kind: 'bzz' | 'bytes';
+  size?: number | null;
+  durationMillis?: number | null;
+  createdAt: Date;
+}
+
 export type StaticTextsRowId = number & { __brand: 'StaticTextsRowId' };
 export interface StaticTextsRow {
   id: StaticTextsRowId;
@@ -235,6 +258,17 @@ export interface NewCryptoPaymentsRow {
   createdAt?: Date | null;
 }
 
+export interface NewDeletedFilesRow {
+  archiveId?: string | null;
+  organizationId: OrganizationsRowId;
+  name: string;
+  contentType: string;
+  hash: string;
+  size: number;
+  originalCreatedAt: Date;
+  createdAt?: Date | null;
+}
+
 export interface NewFeedItemsRow {
   feedId: FeedsRowId;
   fileReferenceId: FileReferencesRowId;
@@ -259,7 +293,7 @@ export interface NewFileReferencesRow {
   thumbnailBase64?: string | null;
   name: string;
   contentType: string;
-  hash?: string | null;
+  hash: string;
   size: number;
   hits?: number | null;
   isWebsite: 0 | 1;
@@ -323,6 +357,14 @@ export interface NewPostageTopUpQueueRow {
   organizationId: OrganizationsRowId;
   postageBatchId: string;
   amount: number;
+  createdAt?: Date | null;
+}
+
+export interface NewPublicHashesRow {
+  hash: string;
+  kind: 'bzz' | 'bytes';
+  size?: number | null;
+  durationMillis?: number | null;
   createdAt?: Date | null;
 }
 
@@ -453,6 +495,30 @@ export async function getOnlyCryptoPaymentsRowOrThrow(
 ): Promise<CryptoPaymentsRow> {
   const [query, values] = buildSelect(filter, options);
   return getOnlyRowOrThrow('SELECT * FROM swarmy.cryptoPayments' + query, ...values) as unknown as CryptoPaymentsRow;
+}
+
+export async function getDeletedFilesRows(
+  filter?: Partial<DeletedFilesRow>,
+  options?: SelectOptions<DeletedFilesRow>,
+): Promise<DeletedFilesRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows('SELECT * FROM swarmy.deletedFiles' + query, ...values) as unknown as DeletedFilesRow[];
+}
+
+export async function getOnlyDeletedFilesRowOrNull(
+  filter?: Partial<DeletedFilesRow>,
+  options?: SelectOptions<DeletedFilesRow>,
+): Promise<DeletedFilesRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull('SELECT * FROM swarmy.deletedFiles' + query, ...values) as unknown as DeletedFilesRow | null;
+}
+
+export async function getOnlyDeletedFilesRowOrThrow(
+  filter?: Partial<DeletedFilesRow>,
+  options?: SelectOptions<DeletedFilesRow>,
+): Promise<DeletedFilesRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow('SELECT * FROM swarmy.deletedFiles' + query, ...values) as unknown as DeletedFilesRow;
 }
 
 export async function getFeedItemsRows(
@@ -692,6 +758,30 @@ export async function getOnlyPostageTopUpQueueRowOrThrow(
   ) as unknown as PostageTopUpQueueRow;
 }
 
+export async function getPublicHashesRows(
+  filter?: Partial<PublicHashesRow>,
+  options?: SelectOptions<PublicHashesRow>,
+): Promise<PublicHashesRow[]> {
+  const [query, values] = buildSelect(filter, options);
+  return getRows('SELECT * FROM swarmy.publicHashes' + query, ...values) as unknown as PublicHashesRow[];
+}
+
+export async function getOnlyPublicHashesRowOrNull(
+  filter?: Partial<PublicHashesRow>,
+  options?: SelectOptions<PublicHashesRow>,
+): Promise<PublicHashesRow | null> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrNull('SELECT * FROM swarmy.publicHashes' + query, ...values) as unknown as PublicHashesRow | null;
+}
+
+export async function getOnlyPublicHashesRowOrThrow(
+  filter?: Partial<PublicHashesRow>,
+  options?: SelectOptions<PublicHashesRow>,
+): Promise<PublicHashesRow> {
+  const [query, values] = buildSelect(filter, options);
+  return getOnlyRowOrThrow('SELECT * FROM swarmy.publicHashes' + query, ...values) as unknown as PublicHashesRow;
+}
+
 export async function getStaticTextsRows(
   filter?: Partial<StaticTextsRow>,
   options?: SelectOptions<StaticTextsRow>,
@@ -805,6 +895,17 @@ export async function updateCryptoPaymentsRow(
   return update('swarmy.cryptoPayments', id, object, atomicHelper);
 }
 
+export async function updateDeletedFilesRow(
+  id: DeletedFilesRowId,
+  object: Partial<NewDeletedFilesRow>,
+  atomicHelper?: {
+    key: keyof NewDeletedFilesRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy.deletedFiles', id, object, atomicHelper);
+}
+
 export async function updateFeedItemsRow(
   id: FeedItemsRowId,
   object: Partial<NewFeedItemsRow>,
@@ -904,6 +1005,17 @@ export async function updatePostageTopUpQueueRow(
   return update('swarmy.postageTopUpQueue', id, object, atomicHelper);
 }
 
+export async function updatePublicHashesRow(
+  id: PublicHashesRowId,
+  object: Partial<NewPublicHashesRow>,
+  atomicHelper?: {
+    key: keyof NewPublicHashesRow;
+    value: unknown;
+  },
+): Promise<number> {
+  return update('swarmy.publicHashes', id, object, atomicHelper);
+}
+
 export async function updateStaticTextsRow(
   id: StaticTextsRowId,
   object: Partial<NewStaticTextsRow>,
@@ -958,6 +1070,10 @@ export async function insertCryptoPaymentsRow(object: NewCryptoPaymentsRow): Pro
   return insert('swarmy.cryptoPayments', object as unknown as Record<string, unknown>) as Promise<CryptoPaymentsRowId>;
 }
 
+export async function insertDeletedFilesRow(object: NewDeletedFilesRow): Promise<DeletedFilesRowId> {
+  return insert('swarmy.deletedFiles', object as unknown as Record<string, unknown>) as Promise<DeletedFilesRowId>;
+}
+
 export async function insertFeedItemsRow(object: NewFeedItemsRow): Promise<FeedItemsRowId> {
   return insert('swarmy.feedItems', object as unknown as Record<string, unknown>) as Promise<FeedItemsRowId>;
 }
@@ -1003,6 +1119,10 @@ export async function insertPostageTopUpQueueRow(object: NewPostageTopUpQueueRow
     'swarmy.postageTopUpQueue',
     object as unknown as Record<string, unknown>,
   ) as Promise<PostageTopUpQueueRowId>;
+}
+
+export async function insertPublicHashesRow(object: NewPublicHashesRow): Promise<PublicHashesRowId> {
+  return insert('swarmy.publicHashes', object as unknown as Record<string, unknown>) as Promise<PublicHashesRowId>;
 }
 
 export async function insertStaticTextsRow(object: NewStaticTextsRow): Promise<StaticTextsRowId> {
