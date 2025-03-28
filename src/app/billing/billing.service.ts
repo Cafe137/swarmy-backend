@@ -11,7 +11,6 @@ import {
 } from 'src/DatabaseExtra';
 import Stripe from 'stripe';
 import { AlertService } from '../alert/alert.service';
-import { BeeService } from '../bee/bee.service';
 import { OrganizationService } from '../organization/organization.service';
 import { PaymentService } from '../payment/payment.service';
 import { PlanService } from '../plan/plan.service';
@@ -28,7 +27,6 @@ export class BillingService {
     private planService: PlanService,
     private stripeService: StripeService,
     private paymentService: PaymentService,
-    private beeService: BeeService,
     private organizationService: OrganizationService,
   ) {}
 

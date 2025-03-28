@@ -107,7 +107,6 @@ export class DataController {
       name: f.name,
       contentType: f.contentType,
       size: f.size,
-      hits: f.hits,
       createdAt: f['createdAt'],
     }));
   }

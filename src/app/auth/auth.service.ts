@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { compare } from 'bcrypt';
 import { Strings, Types } from 'cafe-utility';
 import { getOnlyUsersRowOrNull } from 'src/DatabaseExtra';
 import { OrganizationService } from '../organization/organization.service';
@@ -28,7 +28,7 @@ export class AuthService {
     if (!org || !org.enabled) {
       throw new UnauthorizedException();
     }
-    const matches = await bcrypt.compare(password, user.password);
+    const matches = await compare(password, user.password);
     if (!matches) {
       throw new UnauthorizedException();
     }

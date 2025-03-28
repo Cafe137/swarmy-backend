@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import { hash } from 'bcrypt';
 import { Strings, Types } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
@@ -60,7 +60,7 @@ export class UserService {
 
   async hash(password: string): Promise<string> {
     const saltOrRounds = 10;
-    return bcrypt.hash(password, saltOrRounds);
+    return hash(password, saltOrRounds);
   }
 
   async resendEmailVerification(user?: UsersRow | null, code?: string | null) {
