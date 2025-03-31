@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getOnlyPaymentsRowOrThrow, insertPaymentsRow, OrganizationsRowId, PlansRowId } from 'src/DatabaseExtra';
+import { getOnlyPaymentsRowOrThrow, insertPaymentsRow, OrganizationsRowId, PlansRowId } from 'src/database/Schema';
 
 @Injectable()
 export class PaymentService {

@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, HttpCode, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { Request } from 'express';
-import { OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
+import { OrganizationsRow, UsersRow } from 'src/database/Schema';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { UserInContext } from '../user/user.decorator';

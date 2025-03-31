@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { UsersRow } from 'src/DatabaseExtra';
+import { UsersRow } from 'src/database/Schema';
 import { Public } from '../auth/public.decorator';
 import { UserInContext } from '../user/user.decorator';
 import { PlanService } from './plan.service';

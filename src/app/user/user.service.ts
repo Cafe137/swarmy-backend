@@ -10,7 +10,7 @@ import {
   insertUsersRow,
   updateUsersRow,
   UsersRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { EmailService } from '../email/email.service';
 import { OrganizationService } from '../organization/organization.service';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';

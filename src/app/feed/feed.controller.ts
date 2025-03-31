@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
-import { FeedsRowId, FileReferencesRowId, UsersRow } from 'src/DatabaseExtra';
+import { FeedsRowId, FileReferencesRowId, UsersRow } from 'src/database/Schema';
 import { UserInContext } from '../user/user.decorator';
 import { FeedDto } from './feed.dto';
 import { FeedService } from './feed.service';

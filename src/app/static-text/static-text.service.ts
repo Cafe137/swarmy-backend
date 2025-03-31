@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getOnlyStaticTextsRowOrNull } from 'src/DatabaseExtra';
+import { getOnlyStaticTextsRowOrNull } from 'src/database/Schema';
 
 @Injectable()
 export class StaticTextService {

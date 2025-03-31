@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { runQuery } from 'src/Database';
+import { runQuery } from 'src/database/Database';
 import {
   FileReferencesRow,
   FileReferencesRowId,
@@ -11,7 +11,7 @@ import {
   OrganizationsRow,
   OrganizationsRowId,
   updatePublicHashesRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { BeeService } from '../bee/bee.service';
 
 @Injectable()

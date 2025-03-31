@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { ApiKeysRow, OrganizationsRow } from 'src/DatabaseExtra';
+import { ApiKeysRow, OrganizationsRow } from 'src/database/Schema';
 import { OrganizationService } from '../organization/organization.service';
 import { ApiKeyService } from './api-key.service';
 

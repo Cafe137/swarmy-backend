@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcrypt';
 import { Strings, Types } from 'cafe-utility';
-import { getOnlyUsersRowOrNull } from 'src/DatabaseExtra';
+import { getOnlyUsersRowOrNull } from 'src/database/Schema';
 import { OrganizationService } from '../organization/organization.service';
 
 @Injectable()

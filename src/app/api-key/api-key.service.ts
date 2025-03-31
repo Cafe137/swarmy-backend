@@ -9,7 +9,7 @@ import {
   insertApiKeysRow,
   OrganizationsRowId,
   updateApiKeysRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 
 @Injectable()
 export class ApiKeyService {

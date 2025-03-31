@@ -23,6 +23,7 @@ export interface ApiKeysRow {
   id: ApiKeysRowId;
   organizationId: OrganizationsRowId;
   apiKey: string;
+  label: string;
   status: 'ACTIVE' | 'REVOKED';
   createdAt: Date;
 }
@@ -106,7 +107,6 @@ export interface FileReferencesRow {
   contentType: string;
   hash: string;
   size: number;
-  hits: number;
   isWebsite: 0 | 1;
   uploaded: 0 | 1;
   pathOnDisk: string;
@@ -226,6 +226,7 @@ export interface UsersRow {
 export interface NewApiKeysRow {
   organizationId: OrganizationsRowId;
   apiKey: string;
+  label?: string | null;
   status: 'ACTIVE' | 'REVOKED';
   createdAt?: Date | null;
 }
@@ -295,7 +296,6 @@ export interface NewFileReferencesRow {
   contentType: string;
   hash: string;
   size: number;
-  hits?: number | null;
   isWebsite: 0 | 1;
   uploaded?: 0 | 1 | null;
   pathOnDisk: string;

@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiKeysRowId, UsersRow } from 'src/DatabaseExtra';
+import { ApiKeysRowId, UsersRow } from 'src/database/Schema';
 import { UserInContext } from '../user/user.decorator';
 import { ApiKeyService } from './api-key.service';
 

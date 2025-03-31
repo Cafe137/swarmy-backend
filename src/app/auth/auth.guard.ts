@@ -10,7 +10,7 @@ import {
   OrganizationsRow,
   OrganizationsRowId,
   UsersRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()

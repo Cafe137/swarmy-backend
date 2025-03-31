@@ -11,7 +11,7 @@ import {
   OrganizationsRowId,
   PlansRowId,
   updateCryptoPaymentsRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { PlanService } from '../plan/plan.service';
 
 @Injectable()

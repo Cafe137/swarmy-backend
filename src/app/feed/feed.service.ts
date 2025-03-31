@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Binary, Strings } from 'cafe-utility';
-import { runQuery } from 'src/Database';
+import { runQuery } from 'src/database/Database';
 import {
   FeedsRow,
   FeedsRowId,
@@ -14,7 +14,7 @@ import {
   insertFeedsRow,
   updateFeedsRow,
   UsersRowId,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { BeeService } from '../bee/bee.service';
 
 @Injectable()

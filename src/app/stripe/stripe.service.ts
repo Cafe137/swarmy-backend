@@ -3,7 +3,7 @@ import { randomStringGenerator } from '@nestjs/common/utils/random-string-genera
 import { ConfigService } from '@nestjs/config';
 import { Strings, Types } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { OrganizationsRowId, PlansRowId } from 'src/DatabaseExtra';
+import { OrganizationsRowId, PlansRowId } from 'src/database/Schema';
 import Stripe from 'stripe';
 import { AlertService } from '../alert/alert.service';
 import { PaymentNotificationService } from '../payment/payment-notification.service';

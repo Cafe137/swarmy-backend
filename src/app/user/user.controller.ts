@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
+import { OrganizationsRow, UsersRow } from 'src/database/Schema';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { RegisterUserDto } from './register-user.dto';

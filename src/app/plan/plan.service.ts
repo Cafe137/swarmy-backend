@@ -14,7 +14,7 @@ import {
   PlansRow,
   PlansRowId,
   updatePlansRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { StripeService } from '../stripe/stripe.service';

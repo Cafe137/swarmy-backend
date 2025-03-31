@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Dates, System } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { runQuery } from 'src/Database';
+import { runQuery } from 'src/database/Database';
 import {
   getOnlyOrganizationsRowOrThrow,
   getPostageCreationQueueRows,
   getPostageDiluteQueueRows,
   getPostageTopUpQueueRows,
   updateOrganizationsRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 

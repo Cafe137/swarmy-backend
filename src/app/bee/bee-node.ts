@@ -1,6 +1,6 @@
 import { BatchId, Bee, Bytes, FileData, MerkleTree } from '@ethersphere/bee-js';
 import { PinoLogger } from 'nestjs-pino';
-import { BeesRow } from '../../DatabaseExtra';
+import { BeesRow } from 'src/database/Schema';
 import { createManifestWrapper } from '../utility/utility';
 
 export class BeeNode {

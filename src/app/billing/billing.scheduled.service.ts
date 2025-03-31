@@ -9,7 +9,7 @@ import {
   insertPostageTopUpQueueRow,
   updateOrganizationsRow,
   updatePlansRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { OrganizationService } from '../organization/organization.service';

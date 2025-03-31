@@ -8,7 +8,7 @@ import {
   getFileReferencesRows,
   getOnlyOrganizationsRowOrThrow,
   updateFileReferencesRow,
-} from '../../DatabaseExtra';
+} from 'src/database/Schema';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 import { GlacierService } from './glacier.service';

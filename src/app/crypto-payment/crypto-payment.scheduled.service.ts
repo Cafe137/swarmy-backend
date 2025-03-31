@@ -9,7 +9,7 @@ import {
   getPlansRows,
   getUsersRows,
   updateCryptoPaymentsRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { EmailService } from '../email/email.service';
 import { CryptoPaymentService } from './crypto-payment.service';
 

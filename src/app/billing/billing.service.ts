@@ -8,7 +8,7 @@ import {
   OrganizationsRow,
   updatePaymentsRow,
   UsersRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import Stripe from 'stripe';
 import { AlertService } from '../alert/alert.service';
 import { OrganizationService } from '../organization/organization.service';

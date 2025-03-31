@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
-import { getBeesRows } from '../../DatabaseExtra';
+import { getBeesRows } from 'src/database/Schema';
 import { BeeNode } from './bee-node';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
-import { OrganizationsRow, PlansRowId } from 'src/DatabaseExtra';
+import { OrganizationsRow, PlansRowId } from 'src/database/Schema';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { CryptoPaymentService } from './crypto-payment.service';
 

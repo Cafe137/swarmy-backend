@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { MerkleTree, Strings } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import { OrganizationsRow } from 'src/DatabaseExtra';
+import { OrganizationsRow } from 'src/database/Schema';
 import { UsageMetricsService } from '../usage-metrics/usage-metrics.service';
 import { createManifestWrapper } from '../utility/utility';
 import { FileReferenceService } from './file.service';

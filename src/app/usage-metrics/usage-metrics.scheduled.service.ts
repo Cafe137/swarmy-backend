@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { Dates } from 'cafe-utility';
-import { getUsageMetricsRows, updateUsageMetricsRow } from 'src/DatabaseExtra';
+import { getUsageMetricsRows, updateUsageMetricsRow } from 'src/database/Schema';
 
 @Injectable()
 export class UsageMetricsScheduledService {

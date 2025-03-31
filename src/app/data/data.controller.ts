@@ -18,7 +18,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Binary } from 'cafe-utility';
 import { Request, Response } from 'express';
-import { FileReferencesRowId, OrganizationsRow, UsersRow } from 'src/DatabaseExtra';
+import { FileReferencesRowId, OrganizationsRow, UsersRow } from 'src/database/Schema';
 import { ApiKeyGuard } from '../api-key/api-key.guard';
 import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';

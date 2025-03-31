@@ -6,7 +6,7 @@ import {
   insertOrganizationsRow,
   OrganizationsRow,
   OrganizationsRowId,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()

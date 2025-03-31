@@ -8,7 +8,7 @@ import {
   OrganizationsRowId,
   updateUsageMetricsRow,
   UsageMetricsRow,
-} from 'src/DatabaseExtra';
+} from 'src/database/Schema';
 import { UsageMetricType } from './usage-metric-type';
 
 @Injectable()
