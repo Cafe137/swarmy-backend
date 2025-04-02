@@ -8,6 +8,7 @@ import {
   getOnlyOrganizationsRowOrThrow,
   getPlansRows,
   getUsersRows,
+  insertCryptoPaymentRemindersRow,
   updateCryptoPaymentsRow,
 } from 'src/database/Schema';
 import { EmailService } from '../email/email.service';
@@ -64,6 +65,7 @@ export class CryptoPaymentScheduledService {
         }
         const organization = await getOnlyOrganizationsRowOrThrow({ id: plan.organizationId });
         const { redirectUrl } = await this.cryptoPaymentService.createContinousPayment(organization.id, plan.id);
+        await insertCryptoPaymentRemindersRow({ planId: plan.id, organizationId: organization.id });
         const users = await getUsersRows({ organizationId: organization.id });
         for (const user of users) {
           this.logger.info(`Sending reminder to ${user.email} for plan ${plan.id}`);
