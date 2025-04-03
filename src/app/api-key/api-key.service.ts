@@ -41,4 +41,10 @@ export class ApiKeyService {
     await updateApiKeysRow(id, { status: 'REVOKED' });
     return getOnlyApiKeysRowOrThrow({ id });
   }
+
+  async renameApiKey(organizationId: OrganizationsRowId, id: ApiKeysRowId, label: string): Promise<ApiKeysRow> {
+    await getOnlyApiKeysRowOrThrow({ id, organizationId });
+    await updateApiKeysRow(id, { label });
+    return getOnlyApiKeysRowOrThrow({ id });
+  }
 }

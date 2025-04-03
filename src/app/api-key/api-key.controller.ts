@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiKeysRowId, UsersRow } from 'src/database/Schema';
 import { UserInContext } from '../user/user.decorator';
 import { ApiKeyService } from './api-key.service';
@@ -15,6 +15,11 @@ export class ApiKeyController {
   @Post('/')
   createApiKey(@UserInContext() user: UsersRow) {
     return this.apiKeyService.createApiKey(user.organizationId);
+  }
+
+  @Put('/:id/rename')
+  renameApiKey(@UserInContext() user: UsersRow, @Param('id') id: number, @Body('name') name: string) {
+    return this.apiKeyService.renameApiKey(user.organizationId, id as ApiKeysRowId, name);
   }
 
   @Put('/:id/revoke')
