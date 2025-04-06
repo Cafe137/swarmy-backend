@@ -29,6 +29,18 @@ export class ApiKeyService {
     return getOnlyApiKeysRowOrThrow({ id });
   }
 
+  async createNamedApiKey(organizationId: OrganizationsRowId, name: string): Promise<ApiKeysRow> {
+    this.logger.info(`creating api key for organization ${organizationId}`);
+
+    const id = await insertApiKeysRow({
+      apiKey: randomStringGenerator(),
+      organizationId,
+      status: 'ACTIVE',
+      label: name,
+    });
+    return getOnlyApiKeysRowOrThrow({ id });
+  }
+
   async getApiKeys(organizationId: OrganizationsRowId): Promise<ApiKeysRow[]> {
     return getApiKeysRows({ organizationId });
   }

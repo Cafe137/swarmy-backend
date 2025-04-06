@@ -17,6 +17,11 @@ export class ApiKeyController {
     return this.apiKeyService.createApiKey(user.organizationId);
   }
 
+  @Post('/named')
+  createNamedApiKey(@UserInContext() user: UsersRow, @Body('name') name: string) {
+    return this.apiKeyService.createNamedApiKey(user.organizationId, name);
+  }
+
   @Put('/:id/rename')
   renameApiKey(@UserInContext() user: UsersRow, @Param('id') id: number, @Body('name') name: string) {
     return this.apiKeyService.renameApiKey(user.organizationId, id as ApiKeysRowId, name);
