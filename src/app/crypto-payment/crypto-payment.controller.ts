@@ -4,6 +4,7 @@ import { Types } from 'cafe-utility';
 import { createHmac } from 'crypto';
 import { Request } from 'express';
 import { OrganizationsRow, PlansRowId } from 'src/database/Schema';
+import { Public } from '../auth/public.decorator';
 import { OrganizationInContext } from '../organization/organization.decorator';
 import { CryptoPaymentService } from './crypto-payment.service';
 
@@ -29,6 +30,7 @@ export class CryptoPaymentController {
     return this.cryptoPaymentService.initiatePaymentForPlan(organization.id, planId as PlansRowId);
   }
 
+  @Public()
   @Post('/coinbase')
   handleCoinbaseWebhook(@Req() request: RawBodyRequest<Request>, @Body() body: any) {
     if (!request.rawBody) {
