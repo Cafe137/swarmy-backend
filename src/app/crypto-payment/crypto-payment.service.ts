@@ -80,7 +80,12 @@ export class CryptoPaymentService {
       time: string;
     }[];
     if (timeline.some((x) => x.status === 'COMPLETED')) {
-      await this.planService.activatePlan(payment.organizationId, payment.planId);
+      const plan = await getOnlyPlansRowOrThrow({ id: payment.planId });
+      if (plan.status === 'ACTIVE') {
+        await this.planService.applyRecurringPayment(payment.organizationId);
+      } else if (plan.status === 'PENDING_PAYMENT') {
+        await this.planService.activatePlan(payment.organizationId, payment.planId);
+      }
       await updateCryptoPaymentsRow(payment.id, { status: 'SUCCESS' });
     }
   }
