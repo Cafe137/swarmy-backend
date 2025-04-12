@@ -4,8 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { FixedPointNumber, Types } from 'cafe-utility';
 import {
-  CryptoPaymentsRow,
   getCryptoPaymentsRows,
+  getOnlyCryptoPaymentsRowOrThrow,
   getOnlyPlansRowOrThrow,
   insertCryptoPaymentsRow,
   OrganizationsRowId,
@@ -32,20 +32,6 @@ export class CryptoPaymentService {
   public async initiatePaymentForPlan(organizationId: OrganizationsRowId, planId: PlansRowId) {
     const plan = await getOnlyPlansRowOrThrow({ id: planId, status: 'PENDING_PAYMENT', organizationId });
     return this.createPendingPayment(organizationId, planId, plan.amount);
-  }
-
-  public async checkPayment(payment: CryptoPaymentsRow) {
-    const response = await axios.get(`https://api.commerce.coinbase.com/charges/${payment.merchantUUID}`, {
-      headers: { 'X-CC-Api-Key': this.coinbaseApiKey, 'X-CC-Version': '2018-03-22' },
-    });
-    const timeline = response.data.data.timeline as {
-      status: 'NEW' | 'SIGNED' | 'PENDING' | 'COMPLETED';
-      time: string;
-    }[];
-    if (timeline.some((x) => x.status === 'COMPLETED')) {
-      await this.planService.activatePlan(payment.organizationId, payment.planId);
-      await updateCryptoPaymentsRow(payment.id, { status: 'SUCCESS' });
-    }
   }
 
   public async createContinousPayment(organizationId: OrganizationsRowId, planId: PlansRowId) {
@@ -84,5 +70,18 @@ export class CryptoPaymentService {
       planId,
     });
     return { redirectUrl: response.data.data.hosted_url };
+  }
+
+  async handleWebhook(event: any) {
+    const merchantUUID = event.data.id;
+    const payment = await getOnlyCryptoPaymentsRowOrThrow({ merchantUUID });
+    const timeline = event.data.timeline as {
+      status: 'NEW' | 'SIGNED' | 'PENDING' | 'COMPLETED';
+      time: string;
+    }[];
+    if (timeline.some((x) => x.status === 'COMPLETED')) {
+      await this.planService.activatePlan(payment.organizationId, payment.planId);
+      await updateCryptoPaymentsRow(payment.id, { status: 'SUCCESS' });
+    }
   }
 }

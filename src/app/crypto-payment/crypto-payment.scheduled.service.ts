@@ -4,12 +4,10 @@ import { Dates } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   getCryptoPaymentRemindersRows,
-  getCryptoPaymentsRows,
   getOnlyOrganizationsRowOrThrow,
   getPlansRows,
   getUsersRows,
   insertCryptoPaymentRemindersRow,
-  updateCryptoPaymentsRow,
 } from 'src/database/Schema';
 import { EmailService } from '../email/email.service';
 import { CryptoPaymentService } from './crypto-payment.service';
@@ -22,24 +20,6 @@ export class CryptoPaymentScheduledService {
     private readonly cryptoPaymentService: CryptoPaymentService,
     private readonly emailService: EmailService,
   ) {}
-
-  @Interval(Dates.seconds(30))
-  async checkForPayment() {
-    const pendingCryptoPayments = await getCryptoPaymentsRows({ status: 'PENDING' });
-    for (const payment of pendingCryptoPayments) {
-      await this.cryptoPaymentService.checkPayment(payment);
-    }
-  }
-
-  @Interval(Dates.hours(1))
-  async cleanUpOldPendingPayments() {
-    const cryptoPayments = await getCryptoPaymentsRows({ status: 'PENDING' });
-    for (const payment of cryptoPayments) {
-      if (payment.createdAt.getTime() < Date.now() - Dates.days(1)) {
-        await updateCryptoPaymentsRow(payment.id, { status: 'OBSOLETE' });
-      }
-    }
-  }
 
   @Interval(Dates.hours(1))
   async checkForReminders() {
