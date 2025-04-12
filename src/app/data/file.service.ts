@@ -40,7 +40,7 @@ export class FileReferenceService {
   }
 
   async getFileReferences(organizationId: OrganizationsRowId): Promise<FileReferencesRow[]> {
-    return getFileReferencesRows({ organizationId }, { order: { column: 'id', direction: 'DESC' } });
+    return getFileReferencesRows({ organizationId }, { order: { column: 'id', direction: 'DESC' }, limit: 1000 });
   }
 
   async getFileReference(organization: OrganizationsRow, hash: string): Promise<FileReferencesRow | null> {
