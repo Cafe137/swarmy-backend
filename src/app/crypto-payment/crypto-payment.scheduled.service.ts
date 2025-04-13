@@ -21,7 +21,7 @@ export class CryptoPaymentScheduledService {
     private readonly emailService: EmailService,
   ) {}
 
-  @Interval(Dates.hours(1))
+  @Interval(Dates.minutes(5))
   async checkForReminders() {
     const plans = await getPlansRows({ status: 'ACTIVE', paymentType: 'CRYPTO' });
     for (const plan of plans) {
