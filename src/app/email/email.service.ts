@@ -58,14 +58,15 @@ export class EmailService {
     );
   }
 
-  public async sendCryptoPaymentReminder(to: string, paymentUrl: string) {
+  public async sendCryptoPaymentReminder(to: string, paymentUrl: string, paidUntil: string) {
+    const subject = 'Your next crypto invoice is ready';
     return this.sendEmail(
       to,
-      'Payment reminder',
-      `Your payment is due soon. Please pay by clicking on the link below: ${paymentUrl}`,
+      subject,
+      `Thank you for using Swarmy! Your subscription is active until ${paidUntil}. To continue using the service, please pay your invoice by clicking on the link: ${paymentUrl}`,
       makeEmailTemplate(
-        'Payment reminder',
-        'Your payment is due soon. Please click on the button below to pay.',
+        subject,
+        `Thank you for using Swarmy! Your subscription is active until ${paidUntil}. To continue using the service, please pay your invoice by clicking on the button below.`,
         'Pay Now',
         paymentUrl,
       ),

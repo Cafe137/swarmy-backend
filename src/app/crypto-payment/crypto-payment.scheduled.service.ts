@@ -49,7 +49,11 @@ export class CryptoPaymentScheduledService {
         const users = await getUsersRows({ organizationId: organization.id });
         for (const user of users) {
           this.logger.info(`Sending reminder to ${user.email} for plan ${plan.id}`);
-          await this.emailService.sendCryptoPaymentReminder(user.email, redirectUrl);
+          await this.emailService.sendCryptoPaymentReminder(
+            user.email,
+            redirectUrl,
+            plan.paidUntil.toLocaleDateString(),
+          );
         }
       }
     }
