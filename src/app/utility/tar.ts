@@ -1,7 +1,7 @@
 import { Bee, MantarayNode, NULL_ADDRESS, Reference } from '@ethersphere/bee-js';
 import { AsyncQueue, Chunk, MerkleTree, Strings } from 'cafe-utility';
 import { createReadStream } from 'fs';
-import tar from 'tar-stream';
+import * as tar from 'tar-stream';
 import { mimes } from './mime';
 
 export async function uploadTar(bee: Bee, batchId: string, pathToTar: string): Promise<Reference> {
