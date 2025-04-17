@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Dates, System } from 'cafe-utility';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { createReadStream } from 'node:fs';
-import { readFile, rm } from 'node:fs/promises';
+import { rm } from 'node:fs/promises';
 import {
   FileReferencesRow,
   getFileReferencesRows,
@@ -49,22 +49,21 @@ export class UploadToBeeQueueScheduledService {
 
   private async runUploadJob(file: FileReferencesRow) {
     const organization = await getOnlyOrganizationsRowOrThrow({ id: file.organizationId });
-    const data = await readFile(file.pathOnDisk);
-    const uploadResult = await this.beeService.upload(
+    const reference = await this.beeService.upload(
       organization.beeId,
       organization.postageBatchId!,
-      data,
+      file.pathOnDisk,
       file.name,
       file.contentType,
       file.isWebsite === 1,
     );
-    if (uploadResult.reference.toHex() !== file.hash) {
+    if (reference.toHex() !== file.hash) {
       this.alertService.sendAlert(
-        `File hash mismatch for ID ${file.id}, before: ${file.hash}, after: ${uploadResult.reference.toHex()}`,
+        `File hash mismatch for ID ${file.id}, before: ${file.hash}, after: ${reference.toHex()}`,
       );
     }
     await updateFileReferencesRow(file.id, {
-      hash: uploadResult.reference.toHex(),
+      hash: reference.toHex(),
       uploaded: 1,
     });
   }

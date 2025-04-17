@@ -61,7 +61,7 @@ export class BillingScheduledService {
         await insertPostageTopUpQueueRow({
           organizationId: organization.id,
           postageBatchId: organization.postageBatchId,
-          amount: Number(Utils.getAmountForDuration(Duration.fromDays(3), blockPrice)),
+          amount: Number(Utils.getAmountForDuration(Duration.fromDays(3), blockPrice, 5)),
         });
       }
     }

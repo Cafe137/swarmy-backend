@@ -99,7 +99,7 @@ export class PlanService {
     }
     const requestedGbs = plan.uploadSizeLimit / 1024 / 1024 / 1024;
     const blockPrice = await this.beeService.getDataPricePerBlock();
-    const amount = Utils.getAmountForDuration(Duration.fromDays(DAYS_TO_PURCHASE_POSTAGE_BATCH), blockPrice);
+    const amount = Utils.getAmountForDuration(Duration.fromDays(DAYS_TO_PURCHASE_POSTAGE_BATCH), blockPrice, 5);
     const depth = Utils.getDepthForSize(Size.fromGigabytes(requestedGbs));
     await insertPostageCreationQueueRow({
       organizationId: organization.id,
