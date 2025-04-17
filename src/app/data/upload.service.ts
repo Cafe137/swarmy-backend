@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MerkleTree, Strings } from 'cafe-utility';
-import { InjectPinoLogger } from 'nestjs-pino';
 import { createReadStream } from 'node:fs';
 import { rm, writeFile } from 'node:fs/promises';
 import { OrganizationsRow } from 'src/database/Schema';
@@ -15,7 +14,6 @@ const ENCODER = new TextEncoder();
 @Injectable()
 export class UploadService {
   constructor(
-    @InjectPinoLogger(UploadService.name)
     private usageMetricsService: UsageMetricsService,
     private fileReferenceService: FileReferenceService,
   ) {}
