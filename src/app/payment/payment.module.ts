@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AlertService } from '../alert/alert.service';
+import { AlertModule } from '../alert/alert.module';
 import { PaymentNotificationService } from './payment-notification.service';
 import { PaymentService } from './payment.service';
 
@@ -7,6 +7,6 @@ import { PaymentService } from './payment.service';
   controllers: [],
   providers: [PaymentService, PaymentNotificationService],
   exports: [PaymentService, PaymentNotificationService],
-  imports: [AlertService],
+  imports: [AlertModule],
 })
 export class PaymentModule {}
