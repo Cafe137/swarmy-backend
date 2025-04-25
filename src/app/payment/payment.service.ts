@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { getOnlyPaymentsRowOrThrow, insertPaymentsRow, OrganizationsRowId, PlansRowId } from 'src/database/Schema';
+import {
+  getOnlyPaymentsRowOrThrow,
+  getPaymentsRows,
+  insertPaymentsRow,
+  OrganizationsRowId,
+  PlansRowId,
+} from 'src/database/Schema';
+import { AlertService } from '../alert/alert.service';
 
 @Injectable()
 export class PaymentService {
-  constructor() {}
+  constructor(private alertService: AlertService) {}
 
   async createPendingPayment(
     amount: number,
@@ -24,6 +31,10 @@ export class PaymentService {
   }
 
   async getPaymentByMerchantTransactionId(merchantTransactionId: string) {
+    const rows = await getPaymentsRows({ merchantTransactionId });
+    if (rows.length > 1) {
+      this.alertService.sendAlert(`Duplicate payment row found for merchantTransactionId ${merchantTransactionId}`);
+    }
     return getOnlyPaymentsRowOrThrow({ merchantTransactionId });
   }
 }
