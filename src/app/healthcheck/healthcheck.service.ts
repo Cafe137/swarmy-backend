@@ -56,15 +56,14 @@ export class HealthcheckService {
     );
     const topology = await this.beeService.getTopology();
     const storagePrice = await this.beeService.getDataPricePerBlock();
-    const postageBatches = await this.beeService.getAllPostageBatches();
+    const postageBatches = await this.beeService.getGlobalBatchCount();
 
     return {
       uploadedFiles: uploadedFiles.count,
       downloaded: downloaded.sum,
       latency: latency.average,
       storagePrice,
-      postageBatches: postageBatches.length,
-      neighborhoods: 2 ** topology.depth,
+      postageBatches,
       population: topology.population,
     };
   }
