@@ -56,6 +56,12 @@ export class BeeService {
     return batches;
   }
 
+  async getGlobalBatchCount() {
+    const bee = this.beeHive.getFirstBee();
+    const batches = await bee.bee.getAllGlobalPostageBatch();
+    return batches.length;
+  }
+
   async getWalletBzzBalances() {
     const result: { balance: BZZ; beeNode: BeeNode }[] = [];
     const bees = this.beeHive.getBeeNodes();
@@ -92,6 +98,11 @@ export class BeeService {
   async getTopology() {
     const bee = this.beeHive.getFirstBee();
     return bee.getTopology();
+  }
+
+  async getChainState() {
+    const bee = this.beeHive.getFirstBee();
+    return bee.getDataPricePerBlock();
   }
 
   async updateFeed(

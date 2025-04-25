@@ -1,6 +1,7 @@
 import { BZZ, Topology } from '@ethersphere/bee-js';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { getOnlyRowOrThrow } from 'src/database/Database';
 import { AlertService } from '../alert/alert.service';
 import { BeeService } from '../bee/bee.service';
 
@@ -45,5 +46,26 @@ export class HealthcheckService {
         throw new InternalServerErrorException(message);
       }
     }
+  }
+
+  async getStats() {
+    const uploadedFiles = await getOnlyRowOrThrow('SELECT COUNT(*) as count FROM fileReferences');
+    const downloaded = await getOnlyRowOrThrow('SELECT SUM(size) as sum FROM publicHashes WHERE size IS NOT NULL');
+    const latency = await getOnlyRowOrThrow(
+      'SELECT AVG(durationMillis) as average FROM publicHashes WHERE durationMillis IS NOT NULL AND size < 1000000',
+    );
+    const topology = await this.beeService.getTopology();
+    const storagePrice = await this.beeService.getDataPricePerBlock();
+    const postageBatches = await this.beeService.getAllPostageBatches();
+
+    return {
+      uploadedFiles: uploadedFiles.count,
+      downloaded: downloaded.sum,
+      latency: latency.average,
+      storagePrice,
+      postageBatches,
+      neighborhoods: 2 ** topology.depth,
+      population: topology.population,
+    };
   }
 }
