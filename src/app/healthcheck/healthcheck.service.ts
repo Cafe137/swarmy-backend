@@ -63,7 +63,7 @@ export class HealthcheckService {
       downloaded: downloaded.sum,
       latency: latency.average,
       storagePrice,
-      postageBatches,
+      postageBatches: postageBatches.length,
       neighborhoods: 2 ** topology.depth,
       population: topology.population,
     };
